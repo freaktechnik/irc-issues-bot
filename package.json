@@ -1,0 +1,29 @@
+{
+  "name": "github-issues-irc-bot",
+  "version": "0.0.1",
+  "description": "A simple IRC bot that replies with a link to the github issue when an issue number is mentioned",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/freaktechnik/irc-issues-bot.git"
+  },
+  "dependencies": {
+    "irc": "0.3.x",
+    "github": "*",
+    "irc-colors": "*"
+  },
+  "keywords": [
+    "irc",
+    "github",
+    "bot",
+    "issues"
+  ],
+  "author": "Martin Giger",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/freaktechnik/irc-issues-bot/issues"
+  }
+}
