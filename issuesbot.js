@@ -47,15 +47,16 @@ function IssuesBot(client, repo) {
 	                number: res[1]
 	            },
 	            function(e, data) {
-	            	if(e)
-	                var msg = (data.pull_request == null?"Issue ":"Pull ")
-	                        + c.bold("#"+data.number)
-	                        + ": "
-	                        + data.title
-	                        + _colorStatus(data.state)
-	                        + _additionalInfo(data)
-	                        + data.html_url;
-	                that.client.say(to, msg);
+	                if(!e) {
+		                var msg = (data.pull_request == null?"Issue ":"Pull ")
+		                        + c.bold("#"+data.number)
+		                        + ": "
+		                        + data.title
+		                        + _colorStatus(data.state)
+		                        + _additionalInfo(data)
+		                        + data.html_url;
+		                that.client.say(to, msg);
+		            }
 	            });
 	        }
 	    }
