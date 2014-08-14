@@ -2,7 +2,7 @@
   "name": "github-issues-irc-bot",
   "version": "0.0.1",
   "description": "A simple IRC bot that replies with a link to the github issue when an issue number is mentioned",
-  "main": "main.js",
+  "main": "issuesbot",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

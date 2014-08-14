@@ -1,10 +1,12 @@
+#! /usr/bin/env node
+
 var irc = require("irc");
 
 var channel = "#nightingale";
 
 // IRC config
 var client = new irc.Client("irc.mozilla.org",
-                "ngalebot",
+                "ngissuesbot",
                 {
                     "channels": [ channel ],
                     "floodProtection": true
