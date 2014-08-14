@@ -65,6 +65,10 @@ function IssuesBot(client, repo) {
 	this.client.addListener("invite", function(channel) {
 		that.client.join(channel);
 	});
+
+	this.client.addListener("pm", function(from, message) {
+		that.client.say(from, "I am a Node.js based GitHub Issues bot that displays informations to mentioned issues. To trigger me, just reference the issue with #[Issuenumber]. I am configured for "+that.owner+"/"+that.repo+". If you want to add me to a channel, use /invite. You can find my source on https://github.com/freaktechnik/irc-issues-bot.");
+	})
 }
 
 function _colorStatus(status) {
