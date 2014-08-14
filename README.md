@@ -1,7 +1,7 @@
 irc-issues-bot
 ==============
 
-A node based irc bot that links to issues when they are mentioned. Currently it connot be invoked with a given client or similar.
+A node based irc bot that links to issues when they are mentioned. Only supports linking to issues of one repo. It describes itself when PM'd.
 
 Dependencies
 ------------
@@ -12,6 +12,8 @@ Dependencies
 Bot Usage
 ---------
 You can /invite the bot to additional, not hardcoded channels, though the bot will not autorejoin those in case it's restarted.
+
+To make the bot show info to an issue, just mention the issue number preceded by a # sign in a message.
 
 IssuesBot
 ---------
