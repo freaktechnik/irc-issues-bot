@@ -48,7 +48,7 @@ function IssuesBot(client, repo) {
 	            },
 	            function(e, data) {
 	                if(!e) {
-		                var msg = (data.pull_request == null?"Issue ":"Pull ")
+		                var msg = (data.pull_request?"Pull ":"Issue ")
 		                        + c.bold("#"+data.number)
 		                        + ": "
 		                        + data.title
