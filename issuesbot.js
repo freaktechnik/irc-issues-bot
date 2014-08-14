@@ -47,7 +47,8 @@ function IssuesBot(client, repo) {
 	                number: res[1]
 	            },
 	            function(e, data) {
-	                var msg = (data.hasOwnProperty("pull_request") == null?"Issue ":"Pull ")
+	            	if(e)
+	                var msg = (data.pull_request == null?"Issue ":"Pull ")
 	                        + c.bold("#"+data.number)
 	                        + ": "
 	                        + data.title
