@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
-var { irc } = require("irc");
-var { IssuesBot } = require("./issuesbot");
+var Client = require("irc").Client;
+var IssuesBot = require("./issuesbot").IssuesBot;
 
 var channel = "#nightingale";
 
