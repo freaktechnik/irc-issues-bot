@@ -11,7 +11,10 @@ var github = new githubAPI({
 IssuesBot.prototype.owner = "nightingale-media-player";
 IssuesBot.prototype.repo = "nightingale-hacking";
 IssuesBot.prototype.client = null;
+IssuesBot.prototype.blackList = [];
 function IssuesBot(client, repo) {
+    this.blackList = new Array();
+
 	if(!client)
 		throw new Error("Must pass a client argument to the constructor.");
 	else if(!(client instanceof irc.Client)) {
@@ -35,31 +38,33 @@ function IssuesBot(client, repo) {
 
 	var that = this;
 	this.client.addListener("message#", function(from, to, message) {
-	    var pattern = /#([1-9][0-9]*)/g;
-	    if(pattern.test(message)) {
-	        // reset the regexp pattern
-	        pattern.lastIndex = 0;
-	        var res;
-	        while((res = pattern.exec(message)) !== null) {
-	            github.issues.getRepoIssue({
-	                user: that.owner,
-	                repo: that.repo,
-	                number: res[1]
-	            },
-	            function(e, data) {
-	                if(!e) {
-		                var msg = (data.pull_request.url!=null?"Pull ":"Issue ")
-		                        + c.bold("#"+data.number)
-		                        + ": "
-		                        + data.title
-		                        + _colorStatus(data.state)
-		                        + _additionalInfo(data)
-		                        + data.html_url;
-		                that.client.say(to, msg);
-		            }
-	            });
+        if(that.blackList.indexOf(from) == -1) {
+	        var pattern = /#([1-9][0-9]*)/g;
+	        if(pattern.test(message)) {
+	            // reset the regexp pattern
+	            pattern.lastIndex = 0;
+	            var res;
+	            while((res = pattern.exec(message)) !== null) {
+	                github.issues.getRepoIssue({
+	                    user: that.owner,
+	                    repo: that.repo,
+	                    number: res[1]
+	                },
+	                function(e, data) {
+	                    if(!e) {
+		                    var msg = (data.pull_request.url!=null?"Pull ":"Issue ")
+		                            + c.bold("#"+data.number)
+		                            + ": "
+		                            + data.title
+		                            + _colorStatus(data.state)
+		                            + _additionalInfo(data)
+		                            + data.html_url;
+		                    that.client.say(to, msg);
+		                }
+	                });
+	            }
 	        }
-	    }
+        }
 	});
 
 	this.client.addListener("invite", function(channel) {

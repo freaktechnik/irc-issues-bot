@@ -1,11 +1,12 @@
 #! /usr/bin/env node
 
-var irc = require("irc");
+var { irc } = require("irc");
+var { IssuesBot } = require("./issuesbot");
 
 var channel = "#nightingale";
 
 // IRC config
-var client = new irc.Client("irc.mozilla.org",
+var client = new Client("irc.mozilla.org",
                 "ngissuesbot",
                 {
                     "channels": [ channel ],
@@ -13,4 +14,5 @@ var client = new irc.Client("irc.mozilla.org",
                 }
             );
 
-require("./issuesbot").IssuesBot(client, "nightingale-media-player/nightingale-hacking");
+var bot = new IssuesBot(client, "nightingale-media-player/nightingale-hacking");
+bot.blackList.push("travis-ci");
