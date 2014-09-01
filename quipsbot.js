@@ -3,9 +3,9 @@ var storage = require("node-persist");
 
 QuipsBot.prototype.client = null;
 function QuipsBot(client) {
-    storage.init();
+    storage.initSync();
 
-    if(!storage.length()) {
+    if(!storage.getItem("quips")) {
         storage.setItem("quips", []);
     }
 
