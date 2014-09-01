@@ -5,6 +5,10 @@ QuipsBot.prototype.client = null;
 function QuipsBot(client) {
     storage.init();
 
+    if(!storage.getItem("quips")) {
+        storage.setItem("quips", []);
+    }
+
 	if(!client)
 		throw new Error("Must pass a client argument to the constructor.");
 	else if(!(client instanceof irc.Client)) {
