@@ -13,7 +13,8 @@
   "dependencies": {
     "irc": "0.3.x",
     "github": "*",
-    "irc-colors": "*"
+    "irc-colors": "*",
+    "node-persist": "*"
   },
   "keywords": [
     "irc",

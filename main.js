@@ -2,6 +2,7 @@
 
 var Client = require("irc").Client;
 var IssuesBot = require("./issuesbot").IssuesBot;
+var QuipsBot = require("./quipsbot").QuipsBot;
 
 var channel = "#nightingale";
 
@@ -16,3 +17,5 @@ var client = new Client("irc.mozilla.org",
 
 var bot = new IssuesBot(client, "nightingale-media-player/nightingale-hacking");
 bot.blackList.push("travis-ci");
+
+var quips = new QuipsBot(client);
