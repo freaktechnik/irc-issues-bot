@@ -5,7 +5,7 @@ QuipsBot.prototype.client = null;
 function QuipsBot(client) {
     storage.init();
 
-    if(!storage.getItem("quips")) {
+    if(!storage.length()) {
         storage.setItem("quips", []);
     }
 
