@@ -41,7 +41,7 @@ function _storeQuip(message) {
     storage.setItem("quips", quips);
 }
 
-function _sayRandomQuip() {
+function _getRandomQuip() {
     var quips = storage.getItem("quips"),
         index = getRandomInt(0, quips.length);
     if(quips.length > 0) {
