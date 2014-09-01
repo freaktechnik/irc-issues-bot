@@ -27,7 +27,7 @@ function QuipsBot(client) {
 
 	var that = this;
 	this.client.addListener("message#", function(from, to, message) {
-        var pattern = new RegExp("^"+that.client.opt.nick+":\s?[^ \s]+");
+        var pattern = new RegExp("^"+that.client.opt.nick+":\s?.+");
         if(pattern.test(message)) {
             _storeQuip(message.slice(that.client.opt.nick.length+1));
         }
