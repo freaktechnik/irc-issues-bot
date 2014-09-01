@@ -33,7 +33,7 @@ function QuipsBot(client) {
 	});
 }
 
-exports.IssuesBot = IssuesBot;
+exports.QuipsBot = QuipsBot;
 
 function _storeQuip(message) {
     var quips = storage.getItem("quips");
