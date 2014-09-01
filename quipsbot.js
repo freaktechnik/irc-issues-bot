@@ -27,12 +27,12 @@ function QuipsBot(client) {
 
 	var that = this;
 	this.client.addListener("message#", function(from, to, message) {
-        var pattern = new RegExp("^"+that.client.opt.nick+":\s?\S+");
+        var pattern = new RegExp("^"+that.client.opt.nick+":\s?[^ \s]+");
         if(pattern.test(message)) {
             _storeQuip(message.slice(that.client.opt.nick.length+1));
         }
         else if(message.indexOf(that.client.opt.nick)!=-1) {
-            that.client.say(to, _getRandomQuip());
+            that.client.say(to, from+":"+_getRandomQuip());
         }
 	});
 }
