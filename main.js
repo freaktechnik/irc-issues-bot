@@ -15,6 +15,7 @@ var client = new Client("irc.mozilla.org",
                 }
             );
 
+setInterval(function(){client.send('PONG', 'empty');}, 5*60*1000);
 var bot = new IssuesBot(client, "nightingale-media-player/nightingale-hacking");
 bot.blackList.push("travis-ci");
 
