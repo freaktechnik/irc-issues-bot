@@ -36,34 +36,41 @@ function IssuesBot(client, repo) {
 		this.repo = details[1];
 	}
 
-	var that = this;
+	var that = this,
+        getIssue = function(number, to) {
+            github.issues.getRepoIssue({
+                user: that.owner,
+                repo: that.repo,
+                number: number
+            },
+            function(e, data) {
+                if(!e) {
+                    var msg = (data.pull_request&&data.pull_request.url!=null?"Pull ":"Issue ")
+                                + c.bold("#"+data.number)
+                                + ": "
+                                + data.title
+                                + _colorStatus(data.state)
+                                + _additionalInfo(data)
+                                + data.html_url;
+                    that.client.say(to, msg);
+                }
+            });
+        };
 	this.client.addListener("message#", function(from, to, message) {
         if(that.blackList.indexOf(from) == -1) {
-	        var pattern = /#([1-9][0-9]*)/g;
+	        var pattern = /#([1-9][0-9]*)/g,
+                issueLinkPattern = new RegExp("https?:\/\/(www\.)?github\.com\/"+that.owner+"\/"+that.repo+"\/(issues|pull)\/([1-9][0-9]*)");
 	        if(pattern.test(message)) {
 	            // reset the regexp pattern
 	            pattern.lastIndex = 0;
 	            var res;
 	            while((res = pattern.exec(message)) !== null) {
-	                github.issues.getRepoIssue({
-	                    user: that.owner,
-	                    repo: that.repo,
-	                    number: res[1]
-	                },
-	                function(e, data) {
-	                    if(!e) {
-		                    var msg = (data.pull_request.url!=null?"Pull ":"Issue ")
-		                            + c.bold("#"+data.number)
-		                            + ": "
-		                            + data.title
-		                            + _colorStatus(data.state)
-		                            + _additionalInfo(data)
-		                            + data.html_url;
-		                    that.client.say(to, msg);
-		                }
-	                });
+	                getIssue(res[1], to);
 	            }
 	        }
+            else if(issueLinkPattern.test(message)) {
+                getIssue(issueLinkPattern.exec(message)[3], to);
+            }
         }
 	});
 
