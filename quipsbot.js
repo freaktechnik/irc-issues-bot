@@ -2,11 +2,12 @@ var irc = require("irc");
 var storage = require("node-persist");
 
 QuipsBot.prototype.client = null;
-function QuipsBot(client) {
+QuipsBot.prototype.channel = "#nightingale";
+function QuipsBot(client, channel) {
     storage.initSync();
 
-    if(!storage.getItem("quips")) {
-        storage.setItem("quips", []);
+    if(!storage.getItem("quips"+channel)) {
+        storage.setItem("quips"+channel, []);
     }
 
 	if(!client)
@@ -25,28 +26,30 @@ function QuipsBot(client) {
 		this.client = client;
 	}
 
+    this.channel = channel;
+
 	var that = this;
-	this.client.addListener("message#", function(from, to, message) {
+    this.client.addListener("message"+channel, function(from, message) {
         var pattern = new RegExp("^"+that.client.opt.nick+":.{2,}");
         if(pattern.test(message)) {
-            _storeQuip(message.slice(that.client.opt.nick.length+1));
+            _storeQuip(that.channel, message.slice(that.client.opt.nick.length+1));
         }
         else if(message.indexOf(that.client.opt.nick)!=-1) {
-            that.client.say(to, from+":"+_getRandomQuip());
+            that.client.say(that.channel, from+":"+_getRandomQuip(that.channel));
         }
-	});
+    });
 }
 
 exports.QuipsBot = QuipsBot;
 
-function _storeQuip(message) {
-    var quips = storage.getItem("quips");
+function _storeQuip(message, channel) {
+    var quips = storage.getItem("quips"+channel);
     quips.push(message);
-    storage.setItem("quips", quips);
+    storage.setItem("quips"+channel, quips);
 }
 
-function _getRandomQuip() {
-    var quips = storage.getItem("quips"),
+function _getRandomQuip(channel) {
+    var quips = storage.getItem("quips"+channel),
         index = getRandomInt(0, quips.length);
     if(quips.length > 0) {
         return quips[index];

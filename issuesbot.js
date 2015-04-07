@@ -12,7 +12,8 @@ IssuesBot.prototype.owner = "nightingale-media-player";
 IssuesBot.prototype.repo = "nightingale-hacking";
 IssuesBot.prototype.client = null;
 IssuesBot.prototype.blackList = [];
-function IssuesBot(client, repo) {
+IssuesBot.prototype.channel = "#nightingale";
+function IssuesBot(client, channel, repo) {
     this.blackList = new Array();
 
 	if(!client)
@@ -36,6 +37,8 @@ function IssuesBot(client, repo) {
 		this.repo = details[1];
 	}
 
+    this.channel = channel
+
 	var that = this,
         getIssue = function(number, to) {
             github.issues.getRepoIssue({
@@ -56,7 +59,7 @@ function IssuesBot(client, repo) {
                 }
             });
         };
-	this.client.addListener("message#", function(from, to, message) {
+	this.client.addListener("message"+channel, function(from, to, message) {
         if(that.blackList.indexOf(from) == -1) {
 	        var pattern = /#([1-9][0-9]*)/g,
                 issueLinkPattern = new RegExp("https?:\/\/(www\.)?github\.com\/"+that.owner+"\/"+that.repo+"\/(issues|pull)\/([1-9][0-9]*)");
@@ -72,14 +75,6 @@ function IssuesBot(client, repo) {
                 getIssue(issueLinkPattern.exec(message)[3], to);
             }
         }
-	});
-
-	this.client.addListener("invite", function(channel) {
-		that.client.join(channel);
-	});
-
-	this.client.addListener("pm", function(from, message) {
-		that.client.say(from, "I am a Node.js based GitHub Issues bot that displays informations to mentioned issues. To trigger me, just reference the issue with #[Issuenumber]. I am configured for "+that.owner+"/"+that.repo+". If you want to add me to a channel, use /invite. You can find my source on https://github.com/freaktechnik/irc-issues-bot.");
 	});
 }
 
