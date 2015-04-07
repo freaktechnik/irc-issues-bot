@@ -14,7 +14,8 @@ To install them, just run `npm install` in the root directory of the repository.
 
 Bot Usage
 ---------
-Start the bot using `node main.js server username ownername`.
+Start the bot using `node main.js server username ownername`. You don't have to
+set owenername, but without it, you'll have a hard time controlling the bot.
 
 You can /invite the bot to channels.
 
