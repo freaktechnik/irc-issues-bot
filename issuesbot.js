@@ -98,8 +98,8 @@ IssuesBot.prototype.stop = function() {
 
 IssuesBot.prototype.ignoreUser = function(user) {
     this.ignoredUsers.push(user);
-    var ingnores = storage.getItem("ignore");
-    ingores[thic.channel].push(user);
+    var ignores = storage.getItem("ignore");
+    ignores[this.channel].push(user);
     storage.setItem("ignore", ignores);
 };
 

@@ -152,7 +152,7 @@ client.addListener("pm", function(from, message) {
                 addBot("quips", cmd[1]);
             }
             else if(cmd[0] == "!ignore") {
-                bots["git"][cmd[1]].ignoredUser(cmd[2]);
+                bots["git"][cmd[1]].ignoreUser(cmd[2]);
             }
             else if(cmd[0] == "!list") {
                 var msg = cmd[1];
