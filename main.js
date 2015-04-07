@@ -1,7 +1,6 @@
 #! /usr/bin/env node
 
 //TODO check validity of command args
-//TODO save ignores
 
 var Client = require("irc").Client;
 var IssuesBot = require("./issuesbot").IssuesBot;
@@ -33,6 +32,7 @@ var client = new Client("irc.mozilla.org",
 
 
 var bots = {"git": {}, "quips": {}};
+var owner = "freaktechnik";
 
 storage.getItem("quipsbots").forEach(function(bot) {
     startBot("quips", bot.channel);
@@ -57,8 +57,8 @@ function leaveChannel(channel) {
     var channels = storage.getItem("chans");
     channels.splice(channels.indexOf(channel), 1);
     storage.setItem("chans", channels || []);
-    client.part(channel, "My master needs me in other places!");
     removeBots(channel);
+    client.part(channel, "My master needs me in other places!", function() {/*NULL*/});
 }
 
 client.addListener("invite", function(channel) {
@@ -78,38 +78,131 @@ function startBot(type, channel, options) {
 }
 
 function addBot(type, channel, options) {
-    startBot(type, channel, options);
-
     var persistBots = storage.getItem(type+"bots");
-    persistBots.push({channel: channel, options: options});
-    storage.setItem(type+"bots", persistBots);
+
+    if(!persistBots.some(function(bot) { return bot.channel == channel })) {
+        startBot(type, channel, options);
+
+        persistBots.push({channel: channel, options: options});
+        storage.setItem(type+"bots", persistBots);
+    }
+}
+
+function getBotIndex(type, channel) {
+    var index = -1, bots = storage.getItem(type+"bots");
+    bots.some(function(bot, i) {
+        if(bot.channel == channel) {
+            index = i;
+            return true;
+        }
+        return false;
+    });
+    return index;
+}
+
+function getBotForChannel(type, channel) {
+    var index = getBotIndex(type, channel),
+        bots = storage.getItem(type+"bots");
+    return index > -1 ? bots[index] : null;
+}
+
+function isUserOp(channel, user) {
+    var status = client.chans[channel].users[user];
+    // owner, op, or halfop
+    return status == "~" || status == "@" || status == "%";
 }
 
 function removeBots(channel) {
-    //TODO
+    var git = getBotIndex("git", channel);
+    if(git > -1) {
+        var gitbots = storage.getItem("gitbots");
+        gitbots.splice(git, 1);
+        storage.setItem("gitbots", gitbots);
+        bots["git"][channel].stop();
+        delete bots["git"][channel];
+    }
+    var quips = getBotIndex("quips", channel);
+    if(quips > -1) {
+        var quipsbots = storage.getItem("quipsbots");
+        quipsbots.splice(quips, 1);
+        storage.setItem("quipsbots", quipsbots);
+        bots["quips"][channel].stop();
+        delete bots["quips"][channel];
+    }
 }
 
 client.addListener("pm", function(from, message) {
-    //TODO make admin list dynamic
-    if(message.charAt(0) == "!" && from == "freaktechnik") {
+    if(message.charAt(0) == "!") {
         var cmd = message.split(" ");
-        if(cmd[0] == "!leave") {
-            leaveChannel(cmd[2]);
+        if(cmd[0] == "!help") {
+            client.say(from, "Supported commands: !leave, !join, !git, !quips, !ignore, !list");
         }
-        else if(cmd[0] == "!join") {
-            joinChannelIfNeeded(cmd[1]);
+        else if(cmd.length > 1 && cmd[1].charAt(0) == "#" &&
+           ( from == owner || isUserOp(cmd[1], from) )) {
+            if(cmd[0] == "!leave") {
+                leaveChannel(cmd[1]);
+            }
+            else if(cmd[0] == "!join") {
+                joinChannelIfNeeded(cmd[1]);
+            }
+            else if(cmd[0] == "!git") {
+                addBot("git", cmd[1], cmd[2]);
+            }
+            else if(cmd[0] == "!quips") {
+                addBot("quips", cmd[1]);
+            }
+            else if(cmd[0] == "!ignore") {
+                bots["git"][cmd[1]].ignoredUser(cmd[2]);
+            }
+            else if(cmd[0] == "!list") {
+                var msg = cmd[1];
+                var git = getBotForChannel("git", cmd[1]);
+                var quips = getBotForChannel("quips", cmd[1]);
+
+                if(git || quips) {
+                    msg += ": ";
+                    if(git)
+                        msg += "IssuesBot for "+git.options;
+                    if(git && quips)
+                        msg += ", ";
+                    if(quips)
+                        msg += "QuipsBot";
+                }
+                
+                client.say(from, msg);
+            }
+            else {
+                client.say(from, "Command not found.");
+            }
         }
-        else if(cmd[0] == "!git") {
-            addBot("git", cmd[1], cmd[2]);
-        }
-        else if(cmd[0] == "!quips") {
-            addBot("quips", cmd[1]);
-        }
-        else if(cmd[0] == "!ignore") {
-            bots["git"][cmd[1]].blackList.push(cmd[2]);
+        else if(from == owner) {
+            if(cmd[0] == "!list") {
+                var channels = storage.getItem("chans");
+                var msg;
+                channels.forEach(function(channel) {
+                    msg = channel;
+                    var git = getBotForChannel("git", channel);
+                    var quips = getBotForChannel("quips", channel);
+
+                    if(git || quips) {
+                        msg += ": ";
+                        if(git)
+                            msg += "IssuesBot for "+git.options;
+                        if(git && quips)
+                            msg += ", ";
+                        if(quips)
+                            msg += "QuipsBot";
+                    }
+                    
+                    client.say(from, msg);
+                });
+            }
+            else {
+                client.say(from, "Command not found.");
+            }
         }
         else {
-            client.say(from, "Command not found");
+            client.say(from, "You do not have the permission to execute commands for this channel.");
         }
     }
     else {

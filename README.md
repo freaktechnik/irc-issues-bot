@@ -8,12 +8,16 @@ Dependencies
   * https://github.com/fent/irc-colors.js
   * https://github.com/martynsmith/node-irc
   * https://github.com/mikedeboer/node-github
+  * https://github.com/simonlast/node-persist
+
+To install them, just run `npm install` in the root directory of the repository.
 
 Bot Usage
 ---------
-You can /invite the bot to additional, not hardcoded channels, though the bot will not autorejoin those in case it's restarted.
+You can /invite the bot to channels.
 
-To make the bot show info to an issue, just mention the issue number preceded by a # sign in a message.
+The owner and channel mods can adjust the channel settings. Check !help in a
+private message to the bot for more info.
 
 IssuesBot
 ---------

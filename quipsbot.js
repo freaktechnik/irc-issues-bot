@@ -17,7 +17,7 @@ function QuipsBot(client, channel) {
 		this.client = new irc.Client(client.server,
                 client.name,
                 {
-                    "channels": client.channel,
+                    "channels": client.channels,
                     "floodProtection": true
                 }
             );
@@ -29,7 +29,7 @@ function QuipsBot(client, channel) {
     this.channel = channel;
 
 	var that = this;
-    this.client.addListener("message"+channel, function(from, message) {
+    this.listener = function(from, message) {
         var pattern = new RegExp("^"+that.client.opt.nick+":.{2,}");
         if(pattern.test(message)) {
             _storeQuip(that.channel, message.slice(that.client.opt.nick.length+1));
@@ -37,8 +37,13 @@ function QuipsBot(client, channel) {
         else if(message.indexOf(that.client.opt.nick)!=-1) {
             that.client.say(that.channel, from+":"+_getRandomQuip(that.channel));
         }
-    });
+    };
+    this.client.addListener("message"+channel, this.listener);
 }
+
+QuipsBot.prototype.stop = function() {
+    this.client.removeListener("message"+this.channel, this.listener);
+};
 
 exports.QuipsBot = QuipsBot;
 
@@ -55,7 +60,7 @@ function _getRandomQuip(channel) {
         return quips[index];
     }
     else {
-        return "Hm?";
+        return " Hm?";
     }
 }
 

@@ -1,6 +1,7 @@
 var irc = require("irc");
 var githubAPI = require("github");
 var c = require("irc-colors");
+var storage = require("node-persist");
 
 // Github API setup
 
@@ -11,10 +12,22 @@ var github = new githubAPI({
 IssuesBot.prototype.owner = "nightingale-media-player";
 IssuesBot.prototype.repo = "nightingale-hacking";
 IssuesBot.prototype.client = null;
-IssuesBot.prototype.blackList = [];
+IssuesBot.prototype.ignoredUsers = [];
 IssuesBot.prototype.channel = "#nightingale";
 function IssuesBot(client, channel, repo) {
-    this.blackList = new Array();
+    storage.initSync();
+    
+    if(!storage.getItem("ignore")) {
+        storage.setItem("ignore", {});
+    }
+
+    var ignores = storage.getItem("ignore");
+    if(!ignores[channel]) {
+        ignores[channel] = [];
+        storage.setItem("ignore", ignores);
+    }
+    
+    this.ignoredUsers = ignores[channel];
 
 	if(!client)
 		throw new Error("Must pass a client argument to the constructor.");
@@ -40,7 +53,7 @@ function IssuesBot(client, channel, repo) {
     this.channel = channel
 
 	var that = this,
-        getIssue = function(number, to) {
+        getIssue = function(number) {
             github.issues.getRepoIssue({
                 user: that.owner,
                 repo: that.repo,
@@ -55,12 +68,12 @@ function IssuesBot(client, channel, repo) {
                                 + _colorStatus(data.state)
                                 + _additionalInfo(data)
                                 + data.html_url;
-                    that.client.say(to, msg);
+                    that.client.say(that.channel, msg);
                 }
             });
         };
-	this.client.addListener("message"+channel, function(from, to, message) {
-        if(that.blackList.indexOf(from) == -1) {
+    this.listener = function(from, message) {
+        if(that.ignoredUsers.indexOf(from) == -1) {
 	        var pattern = /#([1-9][0-9]*)/g,
                 issueLinkPattern = new RegExp("https?:\/\/(www\.)?github\.com\/"+that.owner+"\/"+that.repo+"\/(issues|pull)\/([1-9][0-9]*)");
 	        if(pattern.test(message)) {
@@ -68,15 +81,27 @@ function IssuesBot(client, channel, repo) {
 	            pattern.lastIndex = 0;
 	            var res;
 	            while((res = pattern.exec(message)) !== null) {
-	                getIssue(res[1], to);
+	                getIssue(res[1]);
 	            }
 	        }
             else if(issueLinkPattern.test(message)) {
-                getIssue(issueLinkPattern.exec(message)[3], to);
+                getIssue(issueLinkPattern.exec(message)[3]);
             }
         }
-	});
+	};
+	this.client.addListener("message"+channel, this.listener);
 }
+
+IssuesBot.prototype.stop = function() {
+    this.client.removeListener("message"+this.channel, this.listener);
+};
+
+IssuesBot.prototype.ignoreUser = function(user) {
+    this.ignoredUsers.push(user);
+    var ingnores = storage.getItem("ignore");
+    ingores[thic.channel].push(user);
+    storage.setItem("ignore", ignores);
+};
 
 function _colorStatus(status) {
 	if(status == "open") {
