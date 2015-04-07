@@ -7,23 +7,27 @@ var IssuesBot = require("./issuesbot").IssuesBot;
 var QuipsBot = require("./quipsbot").QuipsBot;
 var storage = require("node-persist");
 
-storage.initSync();
+storage.initSync({
+    interval: 2000
+});
+
+var botTypes = ["quips", "git"];
 
 if(!storage.getItem("chans")) {
     storage.setItem("chans", []);
 }
 
-if(!storage.getItem("quipsbots")) {
-    storage.setItem("quipsbots", []);
-}
+botTypes.forEach(function(type) {
+    if(!storage.getItem(type+"bots")) {
+        storage.setItem(type+"bots", []);
+    }
+});
 
-if(!storage.getItem("gitbots")) {
-    storage.setItem("gitbots", []);
-}
+var args = process.argv.slice(2);
 
 // IRC config
-var client = new Client("irc.mozilla.org",
-                "robotechnik",
+var client = new Client(args[0],
+               args[1],
                 {
                     "channels": storage.getItem("chans"),
                     "floodProtection": true
@@ -44,8 +48,12 @@ storage.getItem("gitbots").forEach(function(bot) {
 
 setInterval(function(){client.send('PONG', 'empty');}, 5*60*1000);
 
+function typeExists(type) {
+    return type && botTypes.indexOf(type) > -1;
+}
+
 function joinChannelIfNeeded(channel) {
-    var channels = storage.getItem("chans");
+    var channels = storage.getItem("chans") || [];
     if(channels.indexOf(channel) == -1) {
         channels.push(channel);
         storage.setItem("chans", channels);
@@ -66,8 +74,8 @@ client.addListener("invite", function(channel) {
 });
 
 function startBot(type, channel, options) {
-    var bot;
     joinChannelIfNeeded(channel);
+    var bot;
     if(type == "quips") {
         bot = new QuipsBot(client, channel);
     }
@@ -78,13 +86,17 @@ function startBot(type, channel, options) {
 }
 
 function addBot(type, channel, options) {
-    var persistBots = storage.getItem(type+"bots");
+    if(typeExists(type)) {
+        joinChannelIfNeeded(channel);
 
-    if(!persistBots.some(function(bot) { return bot.channel == channel })) {
-        startBot(type, channel, options);
+        var persistBots = storage.getItem(type+"bots");
 
-        persistBots.push({channel: channel, options: options});
-        storage.setItem(type+"bots", persistBots);
+        if(getBotIndex(type, channel) == -1) {
+            persistBots.push({channel: channel, options: options});
+            storage.setItem(type+"bots", persistBots);
+
+            startBot(type, channel, options);
+        }
     }
 }
 
@@ -112,30 +124,30 @@ function isUserOp(channel, user) {
     return status == "~" || status == "@" || status == "%";
 }
 
+function stopBot(type, channel) {
+    if(typeExists(type)) {
+        var bot = getBotIndex(type, channel);
+        if(bot > -1) {
+            var _bots = storage.getItem(type+"bots");
+            _bots.splice(bot, 1);
+            storage.setItem(type+"bots", _bots);
+            bots[type][channel].stop();
+            delete bots[type][channel];
+        }
+    }
+}
+
 function removeBots(channel) {
-    var git = getBotIndex("git", channel);
-    if(git > -1) {
-        var gitbots = storage.getItem("gitbots");
-        gitbots.splice(git, 1);
-        storage.setItem("gitbots", gitbots);
-        bots["git"][channel].stop();
-        delete bots["git"][channel];
-    }
-    var quips = getBotIndex("quips", channel);
-    if(quips > -1) {
-        var quipsbots = storage.getItem("quipsbots");
-        quipsbots.splice(quips, 1);
-        storage.setItem("quipsbots", quipsbots);
-        bots["quips"][channel].stop();
-        delete bots["quips"][channel];
-    }
+    botTypes.forEach(function(type) {
+        stopBot(type, channel);
+    });
 }
 
 client.addListener("pm", function(from, message) {
     if(message.charAt(0) == "!") {
         var cmd = message.split(" ");
         if(cmd[0] == "!help") {
-            client.say(from, "Supported commands: !leave, !join, !git, !quips, !ignore, !list");
+            client.say(from, "Supported commands: !leave, !join, !git, !quips, !ignore, !list, !start, !stop");
         }
         else if(cmd.length > 1 && cmd[1].charAt(0) == "#" &&
            ( from == owner || isUserOp(cmd[1], from) )) {
@@ -170,6 +182,12 @@ client.addListener("pm", function(from, message) {
                 }
                 
                 client.say(from, msg);
+            }
+            else if(cmd[0] == "!start") {
+                addBot(cmd[2], cmd[1], cmd[3]);
+            }
+            else if(cmd[0] == "!stop") {
+                stopBot(cmd[2], cmd[1]);
             }
             else {
                 client.say(from, "Command not found.");
