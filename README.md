@@ -8,7 +8,7 @@ Dependencies
   * https://github.com/fent/irc-colors.js
   * https://github.com/martynsmith/node-irc
   * https://github.com/mikedeboer/node-github
-  * https://github.com/simonlast/node-persist
+  * https://github.com/lmaccherone/node-localstorage
 
 To install them, just run `npm install` in the root directory of the repository.
 

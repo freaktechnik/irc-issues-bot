@@ -1,7 +1,16 @@
 var irc = require("irc");
 var githubAPI = require("github");
 var c = require("irc-colors");
-var storage = require("node-persist");
+var localStorage = new require("node-localstorage").LocalStorage('./persist');
+
+var storage = {
+    getItem: function(key) {
+        return JSON.parse(localStorage.getItem(key));
+    },
+    setItem: function(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+    }
+};
 
 // Github API setup
 
@@ -15,8 +24,6 @@ IssuesBot.prototype.client = null;
 IssuesBot.prototype.ignoredUsers = [];
 IssuesBot.prototype.channel = "#nightingale";
 function IssuesBot(client, channel, repo) {
-    storage.initSync();
-    
     if(!storage.getItem("ignore")) {
         storage.setItem("ignore", {});
     }

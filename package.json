@@ -14,7 +14,7 @@
     "irc": "0.3.x",
     "github": "*",
     "irc-colors": "*",
-    "node-persist": "*"
+    "node-localstorage": "*"
   },
   "keywords": [
     "irc",

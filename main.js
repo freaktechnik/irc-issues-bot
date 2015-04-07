@@ -5,11 +5,16 @@
 var Client = require("irc").Client;
 var IssuesBot = require("./issuesbot").IssuesBot;
 var QuipsBot = require("./quipsbot").QuipsBot;
-var storage = require("node-persist");
+var localStorage = new require("node-localstorage").LocalStorage('./persist');
 
-storage.initSync({
-    interval: 2000
-});
+var storage = {
+    getItem: function(key) {
+        return JSON.parse(localStorage.getItem(key));
+    },
+    setItem: function(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+    }
+};
 
 var botTypes = ["quips", "git"];
 
