@@ -14,6 +14,8 @@ To install them, just run `npm install` in the root directory of the repository.
 
 Bot Usage
 ---------
+Start the bot using `node main.js server username ownername`.
+
 You can /invite the bot to channels.
 
 The owner and channel mods can adjust the channel settings. Check !help in a

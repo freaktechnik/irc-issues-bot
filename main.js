@@ -25,6 +25,10 @@ botTypes.forEach(function(type) {
 
 var args = process.argv.slice(2);
 
+if(args.length < 2) {
+    throw new Error("No target defined");
+}
+
 // IRC config
 var client = new Client(args[0],
                args[1],
@@ -36,7 +40,7 @@ var client = new Client(args[0],
 
 
 var bots = {"git": {}, "quips": {}};
-var owner = "freaktechnik";
+var owner = args[2] || "freaktechnik";
 
 storage.getItem("quipsbots").forEach(function(bot) {
     startBot("quips", bot.channel);
