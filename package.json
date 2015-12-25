@@ -4,7 +4,11 @@
   "description": "A simple IRC bot that replies with a link to the github issue when an issue number is mentioned",
   "main": "issuesbot",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node main.js"
+  },
+  "engines": {
+    "node": ">=0.12.7"
   },
   "repository": {
     "type": "git",
@@ -26,5 +30,6 @@
   "license": "GPLv3",
   "bugs": {
     "url": "https://github.com/freaktechnik/irc-issues-bot/issues"
-  }
+  },
+  "private": true
 }
