@@ -5,7 +5,7 @@
   "main": "issuesbot",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node main.js"
+    "start": "node main.js irc.mozilla.org robotechnik freaktechnik"
   },
   "engines": {
     "node": ">=0.12.7"
