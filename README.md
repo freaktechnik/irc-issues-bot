@@ -17,6 +17,9 @@ Bot Usage
 Start the bot using `node main.js server username ownername`. You don't have to
 set owenername, but without it, you'll have a hard time controlling the bot.
 
+Set the `REDIS_URL` environment variable to use redis instead of plain text files
+for config storage.
+
 You can /invite the bot to channels.
 
 The owner and channel mods can adjust the channel settings. Check !help in a
