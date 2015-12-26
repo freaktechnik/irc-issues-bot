@@ -33,7 +33,7 @@ function IssuesBot(client, channel, repo) {
         ignores[channel] = [];
         storage.setItem("ignore", ignores);
     }
-    
+
     this.ignoredUsers = ignores[channel];
 
 	if(!client)
@@ -61,14 +61,16 @@ function IssuesBot(client, channel, repo) {
 
 	var that = this,
         getIssue = function(owner, repo, number) {
+            console.log(owner, repo, number);
             github.issues.getRepoIssue({
                 user: owner,
                 repo: repo,
                 number: number
             },
             function(e, data) {
+                console.log(e);
                 if(!e) {
-                    var msg = (owner != that.owner && repo != that.repo?c.grey(that.owner+"/"+that.repo+" "):"")
+                    var msg = (owner != that.owner || repo != that.repo?c.grey(owner+"/"+repo+" "):"")
                                 + (data.pull_request&&data.pull_request.url!=null?"Pull ":"Issue ")
                                 + c.bold("#"+data.number)
                                 + ": "
@@ -82,19 +84,29 @@ function IssuesBot(client, channel, repo) {
         };
     this.listener = function(from, message) {
         if(that.ignoredUsers.indexOf(from) == -1) {
-	        var pattern = /#([1-9][0-9]*)/g,
-                issueLinkPattern = new RegExp("https?:\/\/(www\.)?github\.com\/([^\/]+)\/([^\/]+)\/(issues|pull)\/([1-9][0-9]*)");
+	        var pattern = /([a-zA-Z0-9\-]+\/[^#]+)?#([1-9][0-9]*)/g,
+                issueLinkPattern = /https?:\/\/(www\.)?github\.com\/([^\/]+)\/([^\/]+)\/(issues|pull)\/([1-9][0-9]*)/;
 	        if(pattern.test(message)) {
 	            // reset the regexp pattern
 	            pattern.lastIndex = 0;
-	            var res;
+	            var res, owner, repo;
 	            while((res = pattern.exec(message)) !== null) {
-	                getIssue(that.owner, that.repo, res[1]);
+	                console.log(res);
+	                if(res[1] !== undefined) {
+	                    owner = res[1].split("/")[0];
+	                    repo = res[1].split("/")[1];
+	                }
+	                else {
+	                    owner = that.owner;
+	                    repo = that.repo;
+                    }
+	                getIssue(owner, repo, res[2]);
 	            }
 	        }
             else if(issueLinkPattern.test(message)) {
                 var res = issueLinkPattern.exec(message);
-                getIssue(res[1], res[2], res[3]);
+                console.log(res);
+                getIssue(res[2], res[3], res[5]);
             }
         }
 	};
