@@ -16,6 +16,8 @@ Bot Usage
 ---------
 Start the bot using `node main.js server username ownername`. You don't have to
 set owenername, but without it, you'll have a hard time controlling the bot.
+The arguments can alternatively be specified in the env vars `IRCBOT_SERVER`,
+`IRCBOT_USERNAME` and `IRCBOT_OWNER`.
 
 Set the `REDIS_URL` environment variable to use redis instead of plain text files
 for config storage.

@@ -21,13 +21,13 @@ botTypes.forEach(function(type) {
 
 var args = process.argv.slice(2);
 
-if(args.length < 2) {
+if(args.length < 2 && !process.env.IRCBOT_SERVER) {
     throw new Error("No target defined");
 }
 
 // IRC config
-var client = new Client(args[0],
-               args[1],
+var client = new Client(args[0] || process.env.IRCBOT_SERVER,
+               args[1] || process.env.IRCBOT_USERNAME,
                 {
                     "channels": storage.getItem("chans"),
                     "floodProtection": true
@@ -36,7 +36,7 @@ var client = new Client(args[0],
 
 
 var bots = {"git": {}, "quips": {}};
-var owner = args[2] || "freaktechnik";
+var owner = args[2] || process.env.IRCBOT_OWNER;
 
 storage.getItem("quipsbots").forEach(function(bot) {
     startBot("quips", bot.channel);
