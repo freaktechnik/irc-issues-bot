@@ -5,16 +5,7 @@
 var Client = require("irc").Client;
 var IssuesBot = require("./issuesbot").IssuesBot;
 var QuipsBot = require("./quipsbot").QuipsBot;
-var localStorage = new require("node-localstorage").LocalStorage('./persist');
-
-var storage = {
-    getItem: function(key) {
-        return JSON.parse(localStorage.getItem(key));
-    },
-    setItem: function(key, value) {
-        localStorage.setItem(key, JSON.stringify(value));
-    }
-};
+var storage = require("./storage");
 
 var botTypes = ["quips", "git"];
 
@@ -156,7 +147,7 @@ client.addListener("pm", function(from, message) {
     if(message.charAt(0) == "!") {
         var cmd = message.split(" ");
         if(cmd[0] == "!help") {
-            client.say(from, "Supported commands: !leave, !join, !git, !quips, !ignore, !list, !start, !stop");
+            client.say(from, "Supported commands: !leave #channel, !join #channel, !git #channel owner/repo, !quips #channel, !ignore #channel username, !list, !start #channel type args, !stop #channel type");
         }
         else if(cmd.length > 1 && cmd[1].charAt(0) == "#" &&
            ( from == owner || isUserOp(cmd[1], from) )) {
@@ -189,7 +180,7 @@ client.addListener("pm", function(from, message) {
                     if(quips)
                         msg += "QuipsBot";
                 }
-                
+
                 client.say(from, msg);
             }
             else if(cmd[0] == "!start") {
@@ -220,7 +211,7 @@ client.addListener("pm", function(from, message) {
                         if(quips)
                             msg += "QuipsBot";
                     }
-                    
+
                     client.say(from, msg);
                 });
             }
@@ -233,11 +224,6 @@ client.addListener("pm", function(from, message) {
         }
     }
     else {
-	    client.say(from, "I am a Node.js based GitHub Issues bot that displays informations to mentioned issues. To trigger me, just reference the issue with #[Issuenumber]. If you want to add me to a channel, use /invite. You can find my source on https://github.com/freaktechnik/irc-issues-bot.");
+	    client.say(from, "I am a Node.js based GitHub Issues bot that displays informations to mentioned issues. To trigger me, just reference the issue with #[issuenumber], [owner]/[repo]#[issue] or a github link to the issue. If you want to add me to a channel, use /invite commands after that can be seen here in direct messaging with !help. My master is '"+owner+"' and they can control everything. You can find my source on https://github.com/freaktechnik/irc-issues-bot.");
     }
 });
-
-//var bot = new IssuesBot(client, "nightingale-media-player/nightingale-hacking", "#nightingale");
-//bot.blackList.push("travis-ci");
-
-//var quips = new QuipsBot(client);
