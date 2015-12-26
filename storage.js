@@ -4,7 +4,7 @@ if(process.env.REDIS_URL) {
     var client = require('redis').createClient(process.env.REDIS_URL);
     var deasync = require('deasync');
 
-    var getItem = deasync(client.get);
+    var getItem = deasync(client.get.bind(client));
 
     module.exports = {
         getItem: function(key) {
