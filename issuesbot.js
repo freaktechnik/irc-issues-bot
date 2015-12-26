@@ -60,15 +60,16 @@ function IssuesBot(client, channel, repo) {
     this.channel = channel
 
 	var that = this,
-        getIssue = function(number) {
+        getIssue = function(owner, repo, number) {
             github.issues.getRepoIssue({
-                user: that.owner,
-                repo: that.repo,
+                user: owner,
+                repo: repo,
                 number: number
             },
             function(e, data) {
                 if(!e) {
-                    var msg = (data.pull_request&&data.pull_request.url!=null?"Pull ":"Issue ")
+                    var msg = (owner != that.owner && repo != that.repo?c.grey(that.owner+"/"+that.repo+" "):"")
+                                + (data.pull_request&&data.pull_request.url!=null?"Pull ":"Issue ")
                                 + c.bold("#"+data.number)
                                 + ": "
                                 + data.title
@@ -82,17 +83,18 @@ function IssuesBot(client, channel, repo) {
     this.listener = function(from, message) {
         if(that.ignoredUsers.indexOf(from) == -1) {
 	        var pattern = /#([1-9][0-9]*)/g,
-                issueLinkPattern = new RegExp("https?:\/\/(www\.)?github\.com\/"+that.owner+"\/"+that.repo+"\/(issues|pull)\/([1-9][0-9]*)");
+                issueLinkPattern = new RegExp("https?:\/\/(www\.)?github\.com\/([^\/]+)\/([^\/]+)\/(issues|pull)\/([1-9][0-9]*)");
 	        if(pattern.test(message)) {
 	            // reset the regexp pattern
 	            pattern.lastIndex = 0;
 	            var res;
 	            while((res = pattern.exec(message)) !== null) {
-	                getIssue(res[1]);
+	                getIssue(that.owner, that.repo, res[1]);
 	            }
 	        }
             else if(issueLinkPattern.test(message)) {
-                getIssue(issueLinkPattern.exec(message)[3]);
+                var res = issueLinkPattern.exec(message);
+                getIssue(res[1], res[2], res[3]);
             }
         }
 	};
