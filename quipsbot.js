@@ -1,5 +1,6 @@
 var irc = require("irc");
 var localStorage = new require("node-localstorage").LocalStorage('./persist');
+var randomItem = require("random-item");
 
 var storage = {
     getItem: function(key) {
@@ -61,19 +62,11 @@ function _storeQuip(message, channel) {
 }
 
 function _getRandomQuip(channel) {
-    var quips = storage.getItem("quips"+channel),
-        index = getRandomInt(0, quips.length);
+    var quips = storage.getItem("quips"+channel);
     if(quips.length > 0) {
-        return quips[index];
+        return randomItem(quips);
     }
     else {
         return " Hm?";
     }
-}
-
-// getRandomInt() from MDN:
-// Returns a random integer between min (included) and max (excluded)
-// Using Math.round() will give you a non-uniform distribution!
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min)) + min;
 }
