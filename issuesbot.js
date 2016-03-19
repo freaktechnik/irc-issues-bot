@@ -1,16 +1,7 @@
 var irc = require("irc");
 var githubAPI = require("github");
 var c = require("irc-colors");
-var localStorage = new require("node-localstorage").LocalStorage('./persist');
-
-var storage = {
-    getItem: function(key) {
-        return JSON.parse(localStorage.getItem(key));
-    },
-    setItem: function(key, value) {
-        localStorage.setItem(key, JSON.stringify(value));
-    }
-};
+var storage = require("./storage");
 
 // Github API setup
 

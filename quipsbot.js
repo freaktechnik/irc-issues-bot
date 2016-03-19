@@ -1,15 +1,6 @@
 var irc = require("irc");
-var localStorage = new require("node-localstorage").LocalStorage('./persist');
+var storage = require("./storage");
 var randomItem = require("random-item");
-
-var storage = {
-    getItem: function(key) {
-        return JSON.parse(localStorage.getItem(key));
-    },
-    setItem: function(key, value) {
-        localStorage.setItem(key, JSON.stringify(value));
-    }
-};
 
 QuipsBot.prototype.client = null;
 QuipsBot.prototype.channel = "#nightingale";
