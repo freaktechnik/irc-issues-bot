@@ -61,6 +61,7 @@ EventBot.prototype.doStuff = function() {
 };
 EventBot.prototype.canSetTopic = function() {
     var channel = this.client.chans[this.channel];
+    console.log(channel.users);
     var status = channel.users[this.client.nick];
     var isOP = status == "~" || status == "@" || status == "%";
     
