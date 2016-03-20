@@ -67,6 +67,8 @@ EventBot.prototype.canSetTopic = function() {
     var channel = this.client.chans[this.channel];
     var status = channel.users[this.client.nick];
     var isOP = status == "~" || status == "@" || status == "%";
+    
+    console.log(channel.mode, isOP);
 
     return (channel.mode != "" && channel.mode.indexOf("t") == -1) || isOP;
 };
@@ -87,6 +89,7 @@ EventBot.prototype.getCurrentOrNextEventURL = function(cbk) {
 };
 EventBot.prototype.getEventString = function(cbk) {
     this.getCurrentOrNextEventURL(function(url) {
+        console.log(url);
         cbk("Next event: "+url);
     });
 };

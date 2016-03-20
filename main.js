@@ -44,12 +44,6 @@ var client = new Client(args[0] || process.env.IRCBOT_SERVER,
 var bots = {"git": {}, "quips": {}, "event": {}};
 var owner = args[2] || process.env.IRCBOT_OWNER;
 
-botTypes.forEach(function(type) {
-    storage.getItem(type+"bots").forEach(function(bot) {
-        startBot(type, bot.channel, bot.options);
-    });
-});
-
 setInterval(function(){client.send('PONG', 'empty');}, 5*60*1000);
 
 function typeExists(type) {
@@ -89,6 +83,11 @@ function registerWithNickServ() {
             cliend.say("ChanServ", "UP");
         }
     }
+    botTypes.forEach(function(type) {
+        storage.getItem(type+"bots").forEach(function(bot) {
+            startBot(type, bot.channel, bot.options);
+        });
+    });
 }
 client.addListener("registered", registerWithNickServ);
 client.addListener("quit", function(username) {
