@@ -5,14 +5,16 @@ var request = require("request");
 var SEPARATOR = " | ";
 var INTERVAL = 360000; // 1 hour, I think.
 
-function getNextEvent(data) {
+function getNextEvent(data) {    
+    var now = Date.now();
     var nextDate;
     var nextIndex;
-    var now = new Date();
     for(var i in data) {
-        if(data.hasOwnProperty(i) && (!nextDate || (data[i].start < nextDate && data[i].start > now))) {
+        console.log(data[i].start.getTime() < nextDate, data[i].end.getTime() > now);
+        if(data.hasOwnProperty(i) && ((!nextDate || data[i].start.getTime() < nextDate) && data[i].end.getTime() > now)) {
+            console.log(data[i].start, data[i].end);
             nextIndex = i;
-            nextDate = data[i].start;
+            nextDate = data[i].start.getTime();
         }
     }
     return data[nextIndex];
@@ -35,7 +37,7 @@ function EventBot(client, channel, query) {
 	    that.getTopic(function(topic) {
 	        that.updateTopic(topic);
 	    });
-	    if(that.event && that.event.start.getMilliseconds <= Date.now() - INTERVAL) {
+	    if(that.event && that.event.start.getTime() <= Date.now() - INTERVAL) {
 	        var startsIn = new Date() - that.event.start;
 	        that.client.say(that.event.summary+" ("+that.event.url+") starts in "+startsIn.getHours()+" hours and "+startsIn.getMinutes()+" minutes.");
         }
