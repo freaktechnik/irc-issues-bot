@@ -38,13 +38,12 @@ function EventBot(client, channel, query) {
 	        that.client.say(that.event.summary+" ("+that.event.url+") starts in "+startsIn.getHours()+" hours and "+startsIn.getMinutes()+" minutes.");
         }
 	}, INTERVAL);
-	if(!(this.channel in client.chans)) {
+	if(!(this.channel in client.chans) || !client.chans[channel].users.length) {
 	    var tempJoinListener = function(nicks) {
-            that.client.removeListener("names"+that.channel, tempJoinListener);
+            that.client.removeListener("names"+channel, tempJoinListener);
             that.doStuff();
-            console.log(nicks, that.client.chans[that.channel].users[that.client.nick]);
         };
-        this.client.addListener("names"+this.channel, tempJoinListener);
+        this.client.addListener("names"+channel, tempJoinListener);
     }
 	else
     	this.doStuff();
