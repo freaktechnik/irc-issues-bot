@@ -8,8 +8,9 @@ var INTERVAL = 360000; // 1 hour, I think.
 function getNextEvent(data) {
     var nextDate;
     var nextIndex;
+    var now = new Date();
     for(var i in data) {
-        if(data.hasOwnProperty(i) && (!nextDate || data[i].start < nextDate)) {
+        if(data.hasOwnProperty(i) && (!nextDate || (data[i].start < nextDate && data[i].end > now))) {
             nextIndex = i;
             nextDate = data[i].start;
         }
