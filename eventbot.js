@@ -41,7 +41,7 @@ function EventBot(client, channel, query) {
 	if(!(this.channel in client.chans) || !client.chans[channel].users.length) {
 	    setTimeout(function() {
             that.doStuff();
-        }, 20000);
+        }, 60000);
     }
 	else
     	this.doStuff();
