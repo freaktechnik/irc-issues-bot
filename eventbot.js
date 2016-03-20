@@ -82,7 +82,6 @@ EventBot.prototype.getCurrentOrNextEventURL = function(cbk) {
 };
 EventBot.prototype.getEventString = function(cbk) {
     this.getCurrentOrNextEventURL(function(url) {
-        console.log(url);
         cbk("Next event: "+url);
     });
 };
