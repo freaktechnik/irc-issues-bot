@@ -32,17 +32,23 @@ function EventBot(client, channel, query) {
 	var that = this;
 
 	this.iid = setInterval(function() {
-	    that.getTopic(function(topic) {
-	        that.updateTopic(topic);
-	    });
+	    that.doStuff();
 	    if(that.event && that.event.start.getTime() <= Date.now() - INTERVAL) {
 	        var startsIn = new Date() - that.event.start;
 	        that.client.say(that.event.summary+" ("+that.event.url+") starts in "+startsIn.getHours()+" hours and "+startsIn.getMinutes()+" minutes.");
         }
 	}, INTERVAL);
-	this.getTopic(function(topic) {
-        that.updateTopic(topic);
-    });
+	if(!(this.channel in client.chans)) {
+	    var tempJoinListener = function(channel) {
+	        if(channel == that.channel) {
+	            that.client.removeListener("join", tempJoinListener);
+	            that.doStuff();
+	        }
+        };
+        this.client.addListener("join", tempJoinListener);
+    }
+	else
+    	this.doStuff();
 }
 EventBot.prototype.listener = null;
 EventBot.prototype.client = null;
@@ -51,6 +57,12 @@ EventBot.prototype.query = "";
 EventBot.prototype.topic = "";
 EventBot.prototype.topicCallback = null;
 EventBot.prototype.event = null;
+EventBot.prototype.doStuff = function() {
+    var that = this;
+    this.getTopic(function(topic) {
+        that.updateTopic(topic);
+    });
+};
 EventBot.prototype.canSetTopic = function() {
     var channel = this.client.chans[this.channel];
     var status = channel.users[this.client.nick];
