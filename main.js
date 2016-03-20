@@ -86,6 +86,7 @@ function registerWithNickServ() {
         if(client.nick != nick) {
             client.say("NickServ", "RECOVER "+nick);
             client.send("NICK", nick);
+            cliend.say("ChanServ", "UP");
         }
     }
 }
