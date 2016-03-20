@@ -18,21 +18,10 @@ function getNextEvent(data) {
 }
 
 function EventBot(client, channel, query) {
-    if(!client)
-		throw new Error("Must pass a client argument to the constructor.");
-	else if(!(client instanceof irc.Client)) {
-
-		this.client = new irc.Client(client.server,
-                client.name,
-                {
-                    "channels": client.channel,
-                    "floodProtection": true
-                }
-            );
-	}
-	else {
+    if(!client || !(client instanceof irc.Client))
+		throw new Error("Must pass an irc client argument to the constructor.");
+	else
 		this.client = client;
-	}
 	this.channel = channel;
 	this.query = query;
 

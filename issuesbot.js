@@ -27,21 +27,11 @@ function IssuesBot(client, channel, repo) {
 
     this.ignoredUsers = ignores[channel];
 
-	if(!client)
-		throw new Error("Must pass a client argument to the constructor.");
-	else if(!(client instanceof irc.Client)) {
-
-		this.client = new irc.Client(client.server,
-                client.name,
-                {
-                    "channels": client.channel,
-                    "floodProtection": true
-                }
-            );
-	}
-	else {
+	if(!client || !(client instanceof irc.Client))
+		throw new Error("Must pass an irc client argument to the constructor.");
+	else
 		this.client = client;
-	}
+
 	if(repo) {
 		var details = repo.split("/");
 		this.owner = details[0];

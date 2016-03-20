@@ -9,21 +9,10 @@ function QuipsBot(client, channel) {
         storage.setItem("quips"+channel, []);
     }
 
-	if(!client)
-		throw new Error("Must pass a client argument to the constructor.");
-	else if(!(client instanceof irc.Client)) {
-
-		this.client = new irc.Client(client.server,
-                client.name,
-                {
-                    "channels": client.channels,
-                    "floodProtection": true
-                }
-            );
-	}
-	else {
+	if(!client || !(client instanceof irc.Client))
+		throw new Error("Must pass an irc client argument to the constructor.");
+	else
 		this.client = client;
-	}
 
     this.channel = channel;
 
@@ -31,7 +20,7 @@ function QuipsBot(client, channel) {
     this.listener = function(from, message) {
         var pattern = new RegExp("^"+that.client.opt.nick+":.{2,}");
         if(pattern.test(message)) {
-            _storeQuip(that.channel, message.slice(that.client.opt.nick.length+1));
+            _storeQuip(that.channel, message.slice(that.client.opt.nick.length+1).trim());
         }
         else if(message.indexOf(that.client.opt.nick)!=-1) {
             that.client.say(that.channel, from+":"+_getRandomQuip(that.channel));
@@ -47,6 +36,8 @@ QuipsBot.prototype.stop = function() {
 exports.QuipsBot = QuipsBot;
 
 function _storeQuip(message, channel) {
+    if(message.indexOf("/") == 0)
+        return;
     var quips = storage.getItem("quips"+channel);
     quips.push(message);
     storage.setItem("quips"+channel, quips);
