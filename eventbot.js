@@ -38,13 +38,7 @@ function EventBot(client, channel, query) {
 	        client.say(that.event.summary+" ("+that.event.url+") starts in "+startsIn.getHours()+" hours and "+startsIn.getMinutes()+" minutes.");
         }
 	}, INTERVAL);
-	if(!(this.channel in client.chans) || !client.chans[channel].users.length) {
-	    setTimeout(function() {
-            that.doStuff();
-        }, 60000);
-    }
-	else
-    	this.doStuff();
+	this.doStuff();
 }
 EventBot.prototype.listener = null;
 EventBot.prototype.client = null;
@@ -60,6 +54,8 @@ EventBot.prototype.doStuff = function() {
     });
 };
 EventBot.prototype.canSetTopic = function() {
+    return true;
+/* doesn't work for the bot itself
     var channel = this.client.chans[this.channel];
     console.log(channel.users);
     var status = channel.users[this.client.nick];
@@ -67,7 +63,7 @@ EventBot.prototype.canSetTopic = function() {
     
     console.log(channel.mode, isOP);
 
-    return (channel.mode != "" && channel.mode.indexOf("t") == -1) || isOP;
+    return (channel.mode != "" && channel.mode.indexOf("t") == -1) || isOP;*/
 };
 EventBot.prototype.getCurrentOrNextEventURL = function(cbk) {
     var that = this;
