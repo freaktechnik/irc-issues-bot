@@ -39,13 +39,13 @@ function EventBot(client, channel, query) {
         }
 	}, INTERVAL);
 	if(!(this.channel in client.chans)) {
-	    var tempJoinListener = function(channel) {
-	        if(channel == that.channel) {
-	            that.client.removeListener("join", tempJoinListener);
+	    var tempJoinListener = function(nick) {
+	        if(nick == that.nick) {
+	            that.client.removeListener("join"+that.channel, tempJoinListener);
 	            that.doStuff();
 	        }
         };
-        this.client.addListener("join", tempJoinListener);
+        this.client.addListener("join"+this.channel, tempJoinListener);
     }
 	else
     	this.doStuff();

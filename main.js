@@ -74,8 +74,25 @@ client.addListener("error", function(error) {
     console.error(error);
 });
 var password = args[3] || process.env.IRCBOT_PASSWORD;
+
+function startAllBots(removeListener) {
+    botTypes.forEach(function(type) {
+        storage.getItem(type+"bots").forEach(function(bot) {
+            startBot(type, bot.channel, bot.options);
+        });
+    });
+}
+
 function registerWithNickServ() {
     if(password) {
+        var tempModeListener = function(channel, by, mode, user) {
+            if(user == client.nick) {
+                client.removeListener("+mode", tempModeListener);
+                startAllBots();
+            }
+        };
+        client.addListener("+mode", tempModeListener);
+
         client.say("NickServ", "IDENTIFY "+nick+" "+password);
         if(client.nick != nick) {
             client.say("NickServ", "RECOVER "+nick);
@@ -83,11 +100,9 @@ function registerWithNickServ() {
             cliend.say("ChanServ", "UP");
         }
     }
-    botTypes.forEach(function(type) {
-        storage.getItem(type+"bots").forEach(function(bot) {
-            startBot(type, bot.channel, bot.options);
-        });
-    });
+    else {
+        startAllBots();
+    }
 }
 client.addListener("registered", registerWithNickServ);
 client.addListener("quit", function(username) {
