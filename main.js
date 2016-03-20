@@ -27,8 +27,9 @@ if(args.length < 2 && !process.env.IRCBOT_SERVER) {
 }
 
 // IRC config
+var nick = args[1] || process.env.IRCBOT_USERNAME;
 var client = new Client(args[0] || process.env.IRCBOT_SERVER,
-               args[1] || process.env.IRCBOT_USERNAME,
+                nick,
                 {
                     "channels": storage.getItem("chans"),
                     "floodProtection": true
@@ -73,6 +74,16 @@ client.addListener("invite", function(channel) {
 });
 client.addListener("error", function(error) {
     console.error(error);
+});
+var password = args[3] || process.env.IRCBOT_PASSWORD;
+client.addListener("registered", function() {
+    if(password) {
+        client.say("NickServ", "IDENTIFY "+nick+" "+password);
+        if(client.nick != nick) {
+            client.say("NickServ", "RECOVER "+nick);
+            client.send("NICK", nick);
+        }
+    }
 });
 
 function startBot(type, channel, options) {

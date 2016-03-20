@@ -5,6 +5,18 @@ var request = require("request");
 var SEPARATOR = " | ";
 var INTERVAL = 360000; // 1 hour, I think.
 
+function getNextEvent(data) {
+    var nextDate;
+    var nextIndex;
+    for(var i in data) {
+        if(data.hasOwnProperty(i) && (!nextDate || data[i].start < nextDate)) {
+            nextIndex = i;
+            nextDate = data[i].start;
+        }
+    }
+    return data[nextIndex];
+}
+
 function EventBot(client, channel, query) {
     if(!client)
 		throw new Error("Must pass a client argument to the constructor.");
@@ -56,22 +68,11 @@ EventBot.prototype.canSetTopic = function() {
 
     return (channel.mode != "" && channel.mode.indexOf("t") == -1) || isOP;
 };
-EventBot.prototype.getNextEvent = function(data) {
-    var nextDate;
-    var nextIndex;
-    for(var i in data) {
-        if(data.hasOwnProperty(i) && (!nextDate || data[i].start < nextDate)) {
-            nextIndex = i;
-            nextDate = data[i].start;
-        }
-    }
-    return data[nextIndex];
-};
 EventBot.prototype.getCurrentOrNextEventURL = function(cbk) {
     var that = this;
     ical.fromURL('https://reps.mozilla.org/events/period/future/search/'+this.query+'/ical/', {}, function(error, data) {
         if(!error && data) {
-            that.event = that.getNextEvent(data);
+            that.event = getNextEvent(data);
             if(cbk)
                 cbk(that.event.url);
         }
