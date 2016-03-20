@@ -33,7 +33,7 @@ var client = new Client(args[0] || process.env.IRCBOT_SERVER,
                 {
                     "channels": storage.getItem("chans"),
                     "floodProtection": true,
-                    "secure": provcess.env.IRCBOT_NOTSECURE ? false: true,
+                    "secure": process.env.IRCBOT_NOTSECURE ? false: true,
                     "port": process.env.IRCBOT_PORT || 6697
                 }
             );
