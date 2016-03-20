@@ -10,9 +10,7 @@ function getNextEvent(data) {
     var nextDate;
     var nextIndex;
     for(var i in data) {
-        console.log(data[i].start.getTime() < nextDate, data[i].end.getTime() > now);
         if(data.hasOwnProperty(i) && ((!nextDate || data[i].start.getTime() < nextDate) && data[i].end.getTime() > now)) {
-            console.log(data[i].start, data[i].end);
             nextIndex = i;
             nextDate = data[i].start.getTime();
         }
