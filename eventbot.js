@@ -41,11 +41,11 @@ function EventBot(client, channel, query) {
 	if(!(this.channel in client.chans)) {
 	    var tempJoinListener = function(nick) {
 	        if(nick == that.nick) {
-	            that.client.removeListener("join"+that.channel, tempJoinListener);
+	            that.client.removeListener("names"+that.channel, tempJoinListener);
 	            that.doStuff();
 	        }
         };
-        this.client.addListener("join"+this.channel, tempJoinListener);
+        this.client.addListener("names"+this.channel, tempJoinListener);
     }
 	else
     	this.doStuff();
