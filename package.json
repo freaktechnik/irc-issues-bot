@@ -16,6 +16,7 @@
   "dependencies": {
     "deasync": "^0.1.4",
     "github": "*",
+    "ical": "^0.4.0",
     "irc": "0.3.x",
     "irc-colors": "*",
     "node-localstorage": "*",

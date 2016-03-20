@@ -6,8 +6,9 @@ var Client = require("irc").Client;
 var IssuesBot = require("./issuesbot").IssuesBot;
 var QuipsBot = require("./quipsbot").QuipsBot;
 var storage = require("./storage");
+var EventBot = require("./eventbot").EventBot;
 
-var botTypes = ["quips", "git"];
+var botTypes = ["quips", "git", "event"];
 
 if(!storage.getItem("chans")) {
     storage.setItem("chans", []);
@@ -35,15 +36,13 @@ var client = new Client(args[0] || process.env.IRCBOT_SERVER,
             );
 
 
-var bots = {"git": {}, "quips": {}};
+var bots = {"git": {}, "quips": {}, "event": {}};
 var owner = args[2] || process.env.IRCBOT_OWNER;
 
-storage.getItem("quipsbots").forEach(function(bot) {
-    startBot("quips", bot.channel);
-});
-
-storage.getItem("gitbots").forEach(function(bot) {
-    startBot("git", bot.channel, bot.options);
+botTypes.forEach(function(type) {
+    storage.getItem(type+"bots").forEach(function(bot) {
+        startBot(type, bot.channel, bot.options);
+    });
 });
 
 setInterval(function(){client.send('PONG', 'empty');}, 5*60*1000);
@@ -72,6 +71,9 @@ function leaveChannel(channel) {
 client.addListener("invite", function(channel) {
 	joinChannelIfNeeded(channel);
 });
+client.addListener("error", function(error) {
+    console.error(error);
+});
 
 function startBot(type, channel, options) {
     joinChannelIfNeeded(channel);
@@ -81,6 +83,9 @@ function startBot(type, channel, options) {
     }
     else if(type == "git") {
         bot = new IssuesBot(client, channel, options);
+    }
+    else if(type == "event") {
+        bot = new EventBot(client, channel, options);
     }
     bots[type][channel] = bot;
 }
@@ -131,8 +136,10 @@ function stopBot(type, channel) {
             var _bots = storage.getItem(type+"bots");
             _bots.splice(bot, 1);
             storage.setItem(type+"bots", _bots);
-            bots[type][channel].stop();
-            delete bots[type][channel];
+            if(channel in bots[type]) {
+                bots[type][channel].stop();
+                delete bots[type][channel];
+            }
         }
     }
 }
@@ -170,8 +177,9 @@ client.addListener("pm", function(from, message) {
                 var msg = cmd[1];
                 var git = getBotForChannel("git", cmd[1]);
                 var quips = getBotForChannel("quips", cmd[1]);
+                var event = getBotForChannel("event", cmd[1]);
 
-                if(git || quips) {
+                if(git || quips || event) {
                     msg += ": ";
                     if(git)
                         msg += "IssuesBot for "+git.options;
@@ -179,6 +187,10 @@ client.addListener("pm", function(from, message) {
                         msg += ", ";
                     if(quips)
                         msg += "QuipsBot";
+                    if(event && (quips || git))
+                        msg += ", ";
+                    if(event)
+                        msg += "EventBot for "+event.options;
                 }
 
                 client.say(from, msg);
@@ -201,8 +213,9 @@ client.addListener("pm", function(from, message) {
                     msg = channel;
                     var git = getBotForChannel("git", channel);
                     var quips = getBotForChannel("quips", channel);
+                    var event = getBotForChannel("event", channel);
 
-                    if(git || quips) {
+                    if(git || quips || event) {
                         msg += ": ";
                         if(git)
                             msg += "IssuesBot for "+git.options;
@@ -210,6 +223,10 @@ client.addListener("pm", function(from, message) {
                             msg += ", ";
                         if(quips)
                             msg += "QuipsBot";
+                        if(event && (quips || git))
+                            msg += ", ";
+                        if(event)
+                            msg += "EventBot for "+event.options;
                     }
 
                     client.say(from, msg);
