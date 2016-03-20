@@ -10,7 +10,7 @@ function getNextEvent(data) {
     var nextIndex;
     var now = new Date();
     for(var i in data) {
-        if(data.hasOwnProperty(i) && (!nextDate || (data[i].start < nextDate && data[i].end > now))) {
+        if(data.hasOwnProperty(i) && (!nextDate || (data[i].start < nextDate && data[i].start > now))) {
             nextIndex = i;
             nextDate = data[i].start;
         }
@@ -35,7 +35,7 @@ function EventBot(client, channel, query) {
 	    that.getTopic(function(topic) {
 	        that.updateTopic(topic);
 	    });
-	    if(that.event && that.event.start.getMilliseconds < Date.now() - 360000) {
+	    if(that.event && that.event.start.getMilliseconds <= Date.now() - INTERVAL) {
 	        var startsIn = new Date() - that.event.start;
 	        that.client.say(that.event.summary+" ("+that.event.url+") starts in "+startsIn.getHours()+" hours and "+startsIn.getMinutes()+" minutes.");
         }
