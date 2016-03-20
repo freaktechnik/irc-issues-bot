@@ -27,15 +27,17 @@ if(args.length < 2 && !process.env.IRCBOT_SERVER) {
 }
 
 // IRC config
+var ircOptions = {
+    "channels": storage.getItem("chans"),
+    "floodProtection": true,
+    "port": process.env.IRCBOT_PORT || 6697
+};
+if(!process.env.IRCBOT_NOTSECURE)
+    ircOptions.secure = true;
+
 var nick = args[1] || process.env.IRCBOT_USERNAME;
 var client = new Client(args[0] || process.env.IRCBOT_SERVER,
-                nick,
-                {
-                    "channels": storage.getItem("chans"),
-                    "floodProtection": true,
-                    "secure": process.env.IRCBOT_NOTSECURE ? false: true,
-                    "port": process.env.IRCBOT_PORT || 6697
-                }
+                nick, ircOptions
             );
 
 
