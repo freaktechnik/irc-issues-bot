@@ -37,8 +37,8 @@ if(!process.env.IRCBOT_NOTSECURE)
 
 var nick = args[1] || process.env.IRCBOT_USERNAME;
 var client = new Client(args[0] || process.env.IRCBOT_SERVER,
-                nick, ircOptions
-            );
+    nick, ircOptions
+);
 
 
 var bots = {"git": {}, "quips": {}, "event": {}};
@@ -89,7 +89,7 @@ function registerWithNickServ() {
         }
     }
 }
-client.addListener("registered", registerWithNickServ());
+client.addListener("registered", registerWithNickServ);
 client.addListener("quit", function(username) {
     if(username == nick)
         registerWithNickServ();
