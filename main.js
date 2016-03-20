@@ -32,7 +32,9 @@ var client = new Client(args[0] || process.env.IRCBOT_SERVER,
                 nick,
                 {
                     "channels": storage.getItem("chans"),
-                    "floodProtection": true
+                    "floodProtection": true,
+                    "secure": provcess.env.IRCBOT_NOTSECURE ? false: true,
+                    "port": process.env.IRCBOT_PORT || 6697
                 }
             );
 
@@ -76,7 +78,7 @@ client.addListener("error", function(error) {
     console.error(error);
 });
 var password = args[3] || process.env.IRCBOT_PASSWORD;
-client.addListener("registered", function() {
+function registerWithNickServ() {
     if(password) {
         client.say("NickServ", "IDENTIFY "+nick+" "+password);
         if(client.nick != nick) {
@@ -84,6 +86,11 @@ client.addListener("registered", function() {
             client.send("NICK", nick);
         }
     }
+}
+client.addListener("registered", registerWithNickServ());
+client.addListener("quit", function(username) {
+    if(username == nick)
+        registerWithNickServ();
 });
 
 function startBot(type, channel, options) {

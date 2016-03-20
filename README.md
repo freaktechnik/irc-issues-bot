@@ -16,8 +16,13 @@ Bot Usage
 ---------
 Start the bot using `node main.js server username [ownername] [password]`. You don't have to
 set owenername, but without it, you'll have a hard time controlling the bot.
-The arguments can alternatively be specified in the env vars `IRCBOT_SERVER`,
-`IRCBOT_USERNAME` and `IRCBOT_OWNER` as well as `IRCBOT_PASSWORD` for a NickServ password.
+The arguments can alternatively be specified in these env vars:
+ - `IRCBOT_SERVER`: IRC server address
+ - `IRCBOT_USERNAME`: Username of the bot
+ - `IRCBOT_OWNER`: User with unquestioned control over the bot
+ - `IRCBOT_PASSWORD`: NickServ password
+ - `IRCBOT_PORT`: To connect to an alternate port other than 6697
+ - `IRCBOT_NOTSECURE`: Don't connect via secure connection
 
 Set the `REDIS_URL` environment variable to use redis instead of plain text files
 for config storage.
