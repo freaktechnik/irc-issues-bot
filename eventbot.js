@@ -39,11 +39,10 @@ function EventBot(client, channel, query) {
         }
 	}, INTERVAL);
 	if(!(this.channel in client.chans)) {
-	    var tempJoinListener = function(nick) {
-	        if(nick == that.nick) {
-	            that.client.removeListener("names"+that.channel, tempJoinListener);
-	            that.doStuff();
-	        }
+	    var tempJoinListener = function(nicks) {
+            that.client.removeListener("names"+that.channel, tempJoinListener);
+            that.doStuff();
+            console.log(nicks, that.client.chans[that.channel].users[that.client.nick]);
         };
         this.client.addListener("names"+this.channel, tempJoinListener);
     }
