@@ -35,15 +35,13 @@ function EventBot(client, channel, query) {
 	    that.doStuff();
 	    if(that.event && that.event.start.getTime() <= Date.now() - INTERVAL) {
 	        var startsIn = new Date() - that.event.start;
-	        that.client.say(that.event.summary+" ("+that.event.url+") starts in "+startsIn.getHours()+" hours and "+startsIn.getMinutes()+" minutes.");
+	        client.say(that.event.summary+" ("+that.event.url+") starts in "+startsIn.getHours()+" hours and "+startsIn.getMinutes()+" minutes.");
         }
 	}, INTERVAL);
 	if(!(this.channel in client.chans) || !client.chans[channel].users.length) {
-	    var tempJoinListener = function(nicks) {
-            that.client.removeListener("names"+channel, tempJoinListener);
+	    setTimeout(function() {
             that.doStuff();
-        };
-        this.client.addListener("names"+channel, tempJoinListener);
+        }, 2000);
     }
 	else
     	this.doStuff();
