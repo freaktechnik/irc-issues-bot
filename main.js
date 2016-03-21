@@ -84,6 +84,7 @@ function startAllBots(removeListener) {
 }
 
 function registerWithNickServ() {
+    client.send("MODE", client.nick, "+B");
     if(password) {
         var tempModeListener = function(channel, by, mode, user) {
             if(user == client.nick) {
