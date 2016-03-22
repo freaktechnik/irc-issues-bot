@@ -16,14 +16,13 @@ function QuipsBot(client, channel) {
 
     this.channel = channel;
 
-	var that = this;
     this.listener = function(from, message) {
-        var pattern = new RegExp("^"+that.client.opt.nick+":.{2,}");
+        var pattern = new RegExp("^"+client.nick+":.{2,}");
         if(pattern.test(message)) {
-            _storeQuip(that.channel, message.slice(that.client.opt.nick.length+1).trim());
+            _storeQuip(channel, message.slice(client.nick.length+1).trim());
         }
-        else if(message.indexOf(that.client.opt.nick)!=-1) {
-            that.client.say(that.channel, from+":"+_getRandomQuip(that.channel));
+        else if(message.indexOf(client.nick)!=-1) {
+            client.say(channel, from+":"+_getRandomQuip(channel));
         }
     };
     this.client.addListener("message"+channel, this.listener);
