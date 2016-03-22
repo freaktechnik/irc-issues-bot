@@ -34,7 +34,7 @@ QuipsBot.prototype.stop = function() {
 
 exports.QuipsBot = QuipsBot;
 
-function _storeQuip(message, channel) {
+function _storeQuip(channel, message) {
     if(message.indexOf("/") == 0)
         return;
     var quips = storage.getItem("quips"+channel) || [];
