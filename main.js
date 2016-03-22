@@ -191,7 +191,7 @@ function removeBots(channel) {
 }
 
 function listBotsInChannel(channel) {
-    var msg = channel;
+    var msg = channel + ": ";
     msg += botTypes.map(function(type) {
         var bot = getRunningBotForChannel(type, channel);
         if(bot) {
@@ -210,7 +210,10 @@ client.addListener("pm", function(from, message) {
     if(message.charAt(0) == "!") {
         var cmd = message.split(" ");
         if(cmd[0] == "!help") {
-            client.say(from, "Supported commands: !leave #channel, !join #channel, !git #channel owner/repo, !quips #channel, !ignore #channel username, !list, !start #channel type args, !stop #channel type");
+                client.say(from, "Supported commands: !leave #channel, !join #channel, !git #channel owner/repo, !quips #channel, !ignore #channel username, !list, !start #channel type args, !stop #channel type, !types");
+        }
+        else if(cmd[0] == "!types") {
+            client.say(from, botTypes.join(", "));
         }
         else if(cmd.length > 1 && cmd[1].charAt(0) == "#" &&
            ( from == owner || isUserOp(cmd[1], from) )) {
