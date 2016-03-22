@@ -233,7 +233,10 @@ client.addListener("pm", function(from, message) {
                 bots["git"][cmd[1]].ignoreUser(cmd[2]);
             }
             else if(cmd[0] == "!list") {
-                client.say(from, listBotsInChannel(cmd[1]));
+                if(cmd[1] in client.chans)
+                    client.say(from, listBotsInChannel(cmd[1]));
+                else
+                    client.say(from, "Bot is not in "+cmd[1]+".");
             }
             else if(cmd[0] == "!start") {
                 addBot(cmd[2], cmd[1], cmd[3]);
