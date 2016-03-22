@@ -26,6 +26,7 @@ function QuipsBot(client, channel) {
         }
     };
     this.client.addListener("message"+channel, this.listener);
+    this.description = "QuipsBot";
 }
 
 QuipsBot.prototype.stop = function() {

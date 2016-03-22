@@ -159,6 +159,10 @@ function getBotForChannel(type, channel) {
     return index > -1 ? bots[index] : null;
 }
 
+function getRunningBotForChannel(type, channel) {
+    return bots[type][channel];
+}
+
 function isUserOp(channel, user) {
     var status = client.chans[channel].users[user];
     // owner, op, or halfop
@@ -186,6 +190,22 @@ function removeBots(channel) {
     });
 }
 
+function listBotsInChannel(channel) {
+    var msg = channel;
+    msg += botTypes.map(function(type) {
+        var bot = getRunningBotForChannel(type, channel);
+        if(bot) {
+            return bot.description;
+        }
+        else {
+            return null;
+        }
+    }).filter(function(entry) {
+        return entry !== null;
+    }).join(", ");
+    return msg;
+}
+
 client.addListener("pm", function(from, message) {
     if(message.charAt(0) == "!") {
         var cmd = message.split(" ");
@@ -210,26 +230,7 @@ client.addListener("pm", function(from, message) {
                 bots["git"][cmd[1]].ignoreUser(cmd[2]);
             }
             else if(cmd[0] == "!list") {
-                var msg = cmd[1];
-                var git = getBotForChannel("git", cmd[1]);
-                var quips = getBotForChannel("quips", cmd[1]);
-                var event = getBotForChannel("event", cmd[1]);
-
-                if(git || quips || event) {
-                    msg += ": ";
-                    if(git)
-                        msg += "IssuesBot for "+git.options;
-                    if(git && quips)
-                        msg += ", ";
-                    if(quips)
-                        msg += "QuipsBot";
-                    if(event && (quips || git))
-                        msg += ", ";
-                    if(event)
-                        msg += "EventBot for "+event.options;
-                }
-
-                client.say(from, msg);
+                client.say(from, listBotsInChannel(cmd[1]));
             }
             else if(cmd[0] == "!start") {
                 addBot(cmd[2], cmd[1], cmd[3]);
@@ -246,26 +247,7 @@ client.addListener("pm", function(from, message) {
                 var channels = storage.getItem("chans");
                 var msg;
                 channels.forEach(function(channel) {
-                    msg = channel;
-                    var git = getBotForChannel("git", channel);
-                    var quips = getBotForChannel("quips", channel);
-                    var event = getBotForChannel("event", channel);
-
-                    if(git || quips || event) {
-                        msg += ": ";
-                        if(git)
-                            msg += "IssuesBot for "+git.options;
-                        if(git && quips)
-                            msg += ", ";
-                        if(quips)
-                            msg += "QuipsBot";
-                        if(event && (quips || git))
-                            msg += ", ";
-                        if(event)
-                            msg += "EventBot for "+event.options;
-                    }
-
-                    client.say(from, msg);
+                    client.say(from, listBotsInChannel(channel));
                 });
             }
             else {

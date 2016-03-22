@@ -92,6 +92,8 @@ function IssuesBot(client, channel, repo) {
         }
 	};
 	this.client.addListener("message"+channel, this.listener);
+	
+	this.description = "IssuesBot for "+repo;
 }
 
 IssuesBot.prototype.stop = function() {

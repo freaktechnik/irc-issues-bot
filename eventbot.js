@@ -5,7 +5,7 @@ var request = require("request");
 var SEPARATOR = " | ";
 var INTERVAL = 360000; // 1 hour, I think.
 
-function getNextEvent(data) {    
+function getNextEvent(data) {
     var now = Date.now();
     var nextDate;
     var nextIndex;
@@ -39,6 +39,7 @@ function EventBot(client, channel, query) {
         }
 	}, INTERVAL);
 	this.doStuff();
+	this.description = "EventBot for "+query;
 }
 EventBot.prototype.listener = null;
 EventBot.prototype.client = null;
@@ -60,7 +61,7 @@ EventBot.prototype.canSetTopic = function() {
     console.log(channel.users);
     var status = channel.users[this.client.nick];
     var isOP = status == "~" || status == "@" || status == "%";
-    
+
     console.log(channel.mode, isOP);
 
     return (channel.mode != "" && channel.mode.indexOf("t") == -1) || isOP;*/
