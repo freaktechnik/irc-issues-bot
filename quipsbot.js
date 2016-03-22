@@ -5,7 +5,7 @@ var randomItem = require("random-item");
 QuipsBot.prototype.client = null;
 QuipsBot.prototype.channel = "#nightingale";
 function QuipsBot(client, channel) {
-    if(!storage.getItem("quips"+channel)) {
+    if(!storage.getItem("quips"+channel).length) {
         storage.setItem("quips"+channel, []);
     }
 
@@ -38,7 +38,7 @@ exports.QuipsBot = QuipsBot;
 function _storeQuip(message, channel) {
     if(message.indexOf("/") == 0)
         return;
-    var quips = storage.getItem("quips"+channel);
+    var quips = storage.getItem("quips"+channel) || [];
     quips.push(message);
     storage.setItem("quips"+channel, quips);
 }
