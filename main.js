@@ -277,6 +277,6 @@ client.addListener("pm", function(from, message) {
         }
     }
     else {
-	    client.say(from, "I am a Node.js based GitHub Issues bot that displays informations to mentioned issues. To trigger me, just reference the issue with #[issuenumber], [owner]/[repo]#[issue] or a github link to the issue. If you want to add me to a channel, use /invite commands after that can be seen here in direct messaging with !help. My master is '"+owner+"' and they can control everything. You can find my source on https://github.com/freaktechnik/irc-issues-bot.");
+	    client.say(from, "I am a Node.js based GitHub Issues bot that displays informations to mentioned issues. To trigger me, just reference the issue with #[issuenumber], [owner]/[repo]#[issue] or a github link to the issue. If you want to add me to a channel, use /invite; commands for configuration can be seen here in direct messaging with !help. My master is '"+owner+"' and they can control everything. You can find my source under https://github.com/freaktechnik/irc-issues-bot.");
     }
 });
