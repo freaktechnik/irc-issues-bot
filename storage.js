@@ -8,11 +8,9 @@ if(process.env.REDIS_URL) {
 
     module.exports = {
         getItem: function(key) {
-            console.log("getting", key);
             return JSON.parse(getItem(key));
         },
         setItem: function(key, value) {
-            console.log(key, value);
             client.set(key, JSON.stringify(value));
         }
     };

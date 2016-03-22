@@ -22,7 +22,7 @@ function QuipsBot(client, channel) {
             _storeQuip(channel, message.slice(client.nick.length+1).trim());
         }
         else if(message.indexOf(client.nick)!=-1) {
-            client.say(channel, from+":"+_getRandomQuip(channel));
+            client.say(channel, from+": "+_getRandomQuip(channel));
         }
     };
     this.client.addListener("message"+channel, this.listener);
