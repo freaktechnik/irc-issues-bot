@@ -35,7 +35,7 @@ function EventBot(client, channel, query) {
 	    that.doStuff();
 	    if(that.event && that.event.start.getTime() <= Date.now() - INTERVAL) {
 	        var startsIn = new Date() - that.event.start;
-	        client.say(that.event.summary+" ("+that.event.url+") starts in "+startsIn.getHours()+" hours and "+startsIn.getMinutes()+" minutes.");
+	        client.say(that.channel, that.event.summary+" ("+that.event.url+") starts in "+startsIn.getHours()+" hours and "+startsIn.getMinutes()+" minutes.");
         }
 	}, INTERVAL);
 	this.doStuff();
