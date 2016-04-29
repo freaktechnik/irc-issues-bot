@@ -112,6 +112,9 @@ client.addListener("quit", function(username) {
 });
 
 function startBot(type, channel, options) {
+    if(getRunningBotForChannel(type, channel))
+        return;
+
     joinChannelIfNeeded(channel);
     var bot;
     if(type == "quips") {
@@ -142,8 +145,8 @@ function addBot(type, channel, options) {
 }
 
 function getBotIndex(type, channel) {
-    var index = -1, bots = storage.getItem(type+"bots");
-    bots.some(function(bot, i) {
+    var index = -1, storedBots = storage.getItem(type+"bots");
+    storedBots.some(function(bot, i) {
         if(bot.channel == channel) {
             index = i;
             return true;
@@ -155,8 +158,8 @@ function getBotIndex(type, channel) {
 
 function getBotForChannel(type, channel) {
     var index = getBotIndex(type, channel),
-        bots = storage.getItem(type+"bots");
-    return index > -1 ? bots[index] : null;
+        storedBots = storage.getItem(type+"bots");
+    return index > -1 ? storedBots[index] : null;
 }
 
 function getRunningBotForChannel(type, channel) {
