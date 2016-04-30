@@ -3,7 +3,7 @@ var ical = require("ical");
 var request = require("request");
 
 var SEPARATOR = " | ";
-var INTERVAL = 36000000; // 1 hour, I think.
+var INTERVAL = 3600000; // 1 hour, I think.
 
 function getNextEvent(data) {
     var now = Date.now();
