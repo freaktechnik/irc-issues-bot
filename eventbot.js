@@ -4,6 +4,7 @@ var request = require("request");
 
 var SEPARATOR = " | ";
 var INTERVAL = 3600000; // 1 hour, I think.
+var HOUR = INTERVAL;
 
 function getNextEvent(data) {
     var now = Date.now();
@@ -74,7 +75,7 @@ EventBot.prototype.canSetTopic = function() {
 EventBot.prototype.getCurrentOrNextEventURL = function(cbk) {
     var that = this;
     ical.fromURL('https://reps.mozilla.org/events/period/future/search/'+this.query+'/ical/', {}, function(error, data) {
-        if(!error && data) {
+        if(!error && data && getNextEvent(data)) {
             that.event = getNextEvent(data);
             if(cbk)
                 cbk(that.event.url);
