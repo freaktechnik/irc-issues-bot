@@ -6,6 +6,7 @@ var SEPARATOR = " | ";
 var INTERVAL = 3600000; // 1 hour, I think.
 var HOUR = INTERVAL;
 
+//TODO tz correction?
 function getNextEvent(data) {
     var now = Date.now();
     var nextDate;
@@ -35,8 +36,8 @@ function EventBot(client, channel, query) {
 	this.iid = setInterval(function() {
 	    that.doStuff();
         try {
-	        if(that.event && that.event.start.getTime() <= Date.now() && that.event.start.getTime() >= Date.now() - INTERVAL) {
-	            var startsIn = new Date(that.event.start.getTime() - Date.now());
+	        if(that.event && that.event.start.getTime() >= Date.now() && that.event.start.getTime() <= Date.now() - INTERVAL) {
+	            var startsIn = new Date(Date.now() - that.event.start.getTime());
 	            client.say(channel, that.event.summary+" ("+that.event.url+") starts in "+startsIn.getHours()+" hours and "+startsIn.getMinutes()+" minutes.");
             }
         } catch(e) {
