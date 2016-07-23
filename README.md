@@ -1,5 +1,6 @@
 irc-issues-bot
 ==============
+[![Dependency Status](https://dependencyci.com/github/freaktechnik/irc-issues-bot/badge)](https://dependencyci.com/github/freaktechnik/irc-issues-bot)
 
 A node based irc bot that links to issues when they are mentioned. It describes itself when PM'd.
 
