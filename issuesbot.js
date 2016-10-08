@@ -6,7 +6,7 @@ var storage = require("./storage");
 // Github API setup
 
 var github = new githubAPI({
-    version: "3.0.0"
+    protocol: "https"
 });
 
 IssuesBot.prototype.owner = "nightingale-media-player";
@@ -42,7 +42,7 @@ function IssuesBot(client, channel, repo) {
 
 	var that = this,
         getIssue = function(owner, repo, number) {
-            github.issues.getRepoIssue({
+            github.issues.get({
                 user: owner,
                 repo: repo,
                 number: number
