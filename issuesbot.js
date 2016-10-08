@@ -119,7 +119,11 @@ function _colorStatus(status) {
 function _additionalInfo(data) {
     var ret = "-- (",
         started = false;
-    if(data.assignee != null) {
+    if(data.assignees.length) {
+        ret += "Assignees: " + data.assignees.map((a) => a.login).join(", ");
+        started = true;
+    }
+    else if(data.assignee != null) {
         ret += "Assignee: " + data.assignee.login;
         started = true;
     }
