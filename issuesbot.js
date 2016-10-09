@@ -43,7 +43,7 @@ function IssuesBot(client, channel, repo) {
 	var that = this,
         getIssue = function(owner, repo, number) {
             github.issues.get({
-                user: owner,
+                owner: owner,
                 repo: repo,
                 number: number
             },
