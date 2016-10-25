@@ -109,10 +109,10 @@ IssuesBot.prototype.ignoreUser = function(user) {
 
 function _colorStatus(status) {
 	if(status == "open") {
-        return " ["+c.green(status)+"] ";
+        return c.green(" ["+status+"] ");
     }
     else {
-        return " ["+c.red(status)+"] ";
+        return c.red(" ["+status+"] ");
     }
 };
 
