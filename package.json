@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "deasync": "^0.1.4",
-    "github": "7.0.0",
+    "github": "7.0.1",
     "ical": "^0.5.0",
     "irc": "0.5.2",
     "irc-colors": "*",
