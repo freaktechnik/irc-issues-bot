@@ -1,5 +1,7 @@
 irc-issues-bot
 ==============
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/freaktechnik/irc-issues-bot.svg)](https://greenkeeper.io/)
 [![Dependency Status](https://dependencyci.com/github/freaktechnik/irc-issues-bot/badge)](https://dependencyci.com/github/freaktechnik/irc-issues-bot)
 
 A node based irc bot that links to issues when they are mentioned. It describes itself when PM'd.
