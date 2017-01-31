@@ -37,13 +37,22 @@ Scheduler.prototype.check = function() {
         }
         return false;
     });
+
+    if(this.scheduled.length == 0 && this.hasTimeout()) {
+        this.stop();
+    }
 };
 
 Scheduler.prototype.moveTimeout = function(target) {
     if(this.hasTimeout()) {
         clearInterval(this.TID);
     }
-    this.currentTimeout = setTimeout(this.check.bind(this), target);
+    if(target > 0) {
+        this.TID = setTimeout(this.check.bind(this), target);
+    }
+    else {
+        this.TID = null;
+    }
     this.currentTimeout = target;
 };
 
@@ -75,9 +84,7 @@ Scheduler.prototype.scheduleExact = function(endTime, cbk) {
 };
 
 Scheduler.prototype.stop = function() {
-    clearInterval(this.TID);
-    this.TID = null;
-    this.currentTimeout = 0;
+    this.moveTimeout(0);
 };
 
 module.exports = Scheduler;

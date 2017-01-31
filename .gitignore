@@ -29,3 +29,5 @@ node_modules
 
 # Ignore node-persist data
 persist/*
+.nyc_output
+coverage

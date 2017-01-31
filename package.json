@@ -4,8 +4,9 @@
   "description": "A simple IRC bot that replies with a link to the github issue when an issue number is mentioned",
   "main": "issuesbot",
   "scripts": {
-    "lint": "eslint main.js issuesbot.js eventbot.js quipsbot.js storage.js",
-    "test": "npm run lint"
+    "lint": "eslint main.js issuesbot.js eventbot.js quipsbot.js storage.js test/",
+    "test": "npm run lint && nyc ava",
+    "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
   "engines": {
     "node": ">=6.0.0"
@@ -37,6 +38,7 @@
   },
   "private": true,
   "devDependencies": {
+    "ava": "^0.17.0",
     "eslint": "^3.14.1",
     "eslint-plugin-freaktechnik": "^2.0.0"
   }
