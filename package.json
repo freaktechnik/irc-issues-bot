@@ -4,10 +4,11 @@
   "description": "A simple IRC bot that replies with a link to the github issue when an issue number is mentioned",
   "main": "issuesbot",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint main.js issuesbot.js eventbot.js quipsbot.js storage.js",
+    "test": "npm run lint"
   },
   "engines": {
-    "node": ">=0.12.7"
+    "node": ">=6.0.0"
   },
   "repository": {
     "type": "git",
@@ -15,7 +16,7 @@
   },
   "dependencies": {
     "deasync": "^0.1.4",
-    "github": "5.3.3",
+    "github": "^8.1.1",
     "ical": "^0.5.0",
     "irc": "0.5.0",
     "irc-colors": "*",
@@ -34,5 +35,9 @@
   "bugs": {
     "url": "https://github.com/freaktechnik/irc-issues-bot/issues"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "eslint": "^3.14.1",
+    "eslint-plugin-freaktechnik": "^2.0.0"
+  }
 }

@@ -1,17 +1,16 @@
-var irc = require("irc");
-var ical = require("ical");
-var request = require("request");
+"use strict";
 
-var SEPARATOR = " | ";
-var INTERVAL = 3600000; // 1 hour, I think.
-var HOUR = INTERVAL;
+const irc = require("irc"),
+    ical = require("ical"),
+    SEPARATOR = " | ",
+    INTERVAL = 3600000; // 1 hour, I think.
 
 //TODO tz correction?
 function getNextEvent(data) {
-    var now = Date.now();
-    var nextDate;
-    var nextIndex;
-    for(var i in data) {
+    const now = Date.now();
+    let nextDate,
+        nextIndex;
+    for(const i in data) {
         if(data.hasOwnProperty(i) && ((!nextDate || data[i].start.getTime() < nextDate) && data[i].end.getTime() > now)) {
             nextIndex = i;
             nextDate = data[i].start.getTime();
@@ -21,44 +20,43 @@ function getNextEvent(data) {
 }
 
 function EventBot(client, channel, query) {
-    if(!client || !(client instanceof irc.Client))
-		throw new Error("Must pass an irc client argument to the constructor.");
-	else
-		this.client = client;
-	this.channel = channel;
-	this.query = query;
+    if(!client || !(client instanceof irc.Client)) {
+        throw new Error("Must pass an irc client argument to the constructor.");
+    }
+    else {
+        this.client = client;
+    }
+    this.channel = channel;
+    this.query = query;
 
-	// cache warmup
-	this.getCurrentOrNextEventURL();
+    // cache warmup
+    this.getCurrentOrNextEventURL();
 
-	var that = this;
-
-	this.iid = setInterval(function() {
-	    that.doStuff();
+    this.iid = setInterval(() => {
+        this.doStuff();
         try {
-	        if(that.event && that.event.start.getTime() >= Date.now() && that.event.start.getTime() <= Date.now() + INTERVAL) {
-	            var startsIn = new Date(that.event.start.getTime() - Date.now());
-	            client.say(channel, that.event.summary+" ("+that.event.url+") starts in "+startsIn.getHours()+" hours and "+startsIn.getMinutes()+" minutes.");
+            if(this.event && this.event.start.getTime() >= Date.now() && this.event.start.getTime() <= Date.now() + INTERVAL) {
+                const startsIn = new Date(this.event.start.getTime() - Date.now());
+                client.say(channel, this.event.summary + " (" + this.event.url + ") starts in " + startsIn.getHours() + " hours and " + startsIn.getMinutes() + " minutes.");
             }
-        } catch(e) {
+        }
+        catch(e) {
             client.say(channel, "Failed to say something about the next event");
             client.say("freaktechnik", e);
         }
-	}, INTERVAL);
-	this.doStuff();
-	this.description = "EventBot for "+query;
+    }, INTERVAL);
+    this.doStuff();
+    this.description = "EventBot for " + query;
 }
 EventBot.prototype.listener = null;
 EventBot.prototype.client = null;
 EventBot.prototype.iid = null;
 EventBot.prototype.query = "";
 EventBot.prototype.topic = "";
-EventBot.prototype.topicCallback = null;
 EventBot.prototype.event = null;
 EventBot.prototype.doStuff = function() {
-    var that = this;
-    this.getTopic(function(topic) {
-        that.updateTopic(topic);
+    this.getTopic((topic) => {
+        this.updateTopic(topic);
     });
 };
 EventBot.prototype.canSetTopic = function() {
@@ -73,65 +71,64 @@ EventBot.prototype.canSetTopic = function() {
 
     return (channel.mode != "" && channel.mode.indexOf("t") == -1) || isOP;*/
 };
-EventBot.prototype.getCurrentOrNextEventURL = function(cbk) {
-    var that = this;
-    ical.fromURL('https://reps.mozilla.org/events/period/future/search/'+this.query+'/ical/', {}, function(error, data) {
-        if(!error && data && getNextEvent(data)) {
-            that.event = getNextEvent(data);
-            if(cbk)
-                cbk(that.event.url);
-        }
-        else {
-            that.event = null;
-            if(cbk)
-                cbk("No event planned");
-        }
+EventBot.prototype.getCurrentOrNextEventURL = function() {
+    return new Promise((resolve) => {
+        ical.fromURL('https://reps.mozilla.org/events/period/future/search/' + this.query + '/ical/', {}, (error, data) => {
+            if(!error && data && getNextEvent(data)) {
+                this.event = getNextEvent(data);
+                resolve(this.event.url);
+            }
+            else {
+                this.event = null;
+                resolve("No event planned");
+            }
+        });
     });
 };
-EventBot.prototype.getEventString = function(cbk) {
-    this.getCurrentOrNextEventURL(function(url) {
-        cbk("Next event: "+url);
+EventBot.prototype.getEventString = function() {
+    this.getCurrentOrNextEventURL().then((url) => {
+        return "Next event: " + url;
     });
 };
-EventBot.prototype.topicCurrent = function(topic, cbk) {
-    this.getEventString(function(string) {
-        cbk(topic.split(SEPARATOR).pop() == string);
+EventBot.prototype.topicCurrent = function(topic) {
+    this.getEventString().then((string) => {
+        return topic.split(SEPARATOR).pop() == string;
     });
 };
-EventBot.prototype.getNewTopic = function(topic, cbk) {
-    this.getEventString(function(string) {
-        var arr = topic.split(SEPARATOR);
+EventBot.prototype.getNewTopic = function(topic) {
+    this.getEventString().then((string) => {
+        const arr = topic.split(SEPARATOR);
         arr.splice(-1, 1, string);
-        cbk(arr.join(SEPARATOR));
+        return arr.join(SEPARATOR);
     });
 };
 EventBot.prototype.updateTopic = function(topic) {
-    var that = this;
-    if(!this.canSetTopic())
+    if(!this.canSetTopic()) {
         return;
+    }
 
-    this.topicCurrent(topic, function(isCurrent) {
+    this.topicCurrent(topic).then((isCurrent) => {
         if(!isCurrent) {
-            that.getNewTopic(topic, function(newTopic) {
-                that.client.send("TOPIC", that.channel, newTopic);
+            this.getNewTopic(topic).then((newTopic) => {
+                this.client.send("TOPIC", this.channel, newTopic);
             });
         }
     });
 };
-EventBot.prototype.getTopic = function(cbk) {
-    if(cbk) {
-        if(this.channel in this.client.chans && "topic" in this.client.chans[this.channel])
-            cbk(this.client.chans[this.channel].topic);
-        else {
-            var that = this;
-            var tempListener = function(channel, topic) {
-                that.client.removeListener("topic", tempListener);
-                tempListener = null;
-                if(channel == that.channel)
-                    cbk(topic);
+EventBot.prototype.getTopic = function() {
+    if(this.channel in this.client.chans && "topic" in this.client.chans[this.channel]) {
+        return Promise.resolve(this.client.chans[this.channel].topic);
+    }
+    else {
+        return new Promise((resolve) => {
+            const tempListener = (channel, topic) => {
+                if(channel == this.channel) {
+                    this.client.removeListener("topic", tempListener);
+                    resolve(topic);
+                }
             };
             this.client.addListener("topic", tempListener);
-        }
+        });
     }
 };
 EventBot.prototype.stop = function() {
