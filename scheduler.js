@@ -79,3 +79,5 @@ Scheduler.prototype.stop = function() {
     this.TID = null;
     this.currentTimeout = 0;
 };
+
+module.exports = Scheduler;
