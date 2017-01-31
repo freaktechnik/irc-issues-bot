@@ -2,6 +2,7 @@
 
 const irc = require("irc"),
     ical = require("ical"),
+    Scheduler = require("./scheduler"),
     SEPARATOR = " | ",
     INTERVAL = 3600000; // 1 hour, I think.
 
@@ -28,29 +29,19 @@ function EventBot(client, channel, query) {
     }
     this.channel = channel;
     this.query = query;
+    this.scheduler = new Scheduler();
 
     // cache warmup
     this.getCurrentOrNextEventURL();
 
-    this.iid = setInterval(() => {
+    this.scheduler.scheduleRepeating(INTERVAL, () => {
         this.doStuff();
-        try {
-            if(this.event && this.event.start.getTime() >= Date.now() && this.event.start.getTime() <= Date.now() + INTERVAL) {
-                const startsIn = new Date(this.event.start.getTime() - Date.now());
-                client.say(channel, this.event.summary + " (" + this.event.url + ") starts in " + startsIn.getHours() + " hours and " + startsIn.getMinutes() + " minutes.");
-            }
-        }
-        catch(e) {
-            client.say(channel, "Failed to say something about the next event");
-            client.say("freaktechnik", e);
-        }
-    }, INTERVAL);
+    });
     this.doStuff();
     this.description = "EventBot for " + query;
 }
 EventBot.prototype.listener = null;
 EventBot.prototype.client = null;
-EventBot.prototype.iid = null;
 EventBot.prototype.query = "";
 EventBot.prototype.topic = "";
 EventBot.prototype.event = null;
@@ -71,11 +62,27 @@ EventBot.prototype.canSetTopic = function() {
 
     return (channel.mode != "" && channel.mode.indexOf("t") == -1) || isOP;*/
 };
+
+EventBot.prototype.announceEvent = function() {
+    try {
+        const startsIn = new Date(this.event.start.getTime() - Date.now());
+        this.client.say(this.channel, this.event.summary + " (" + this.event.url + ") starts in " + startsIn.getHours() + " hours and " + startsIn.getMinutes() + " minutes.");
+    }
+    catch(e) {
+        this.client.say(this.channel, "Failed to say something about the next event");
+        this.client.say("freaktechnik", e);
+    }
+};
+
 EventBot.prototype.getCurrentOrNextEventURL = function() {
     return new Promise((resolve) => {
         ical.fromURL('https://reps.mozilla.org/events/period/future/search/' + this.query + '/ical/', {}, (error, data) => {
             if(!error && data && getNextEvent(data)) {
                 this.event = getNextEvent(data);
+                // Announce the even INTERVAL before it begins
+                this.scheduler.scheduleExact(this.event.start.getTime() - INTERVAL, this.announceEvent.bind(this));
+                // Ensure the event gets removed from the topic within timely manner.
+                this.scheduler.scheduleExact(this.event.end.getTime() + 10000, this.doStuff.bind(this));
                 resolve(this.event.url);
             }
             else {
@@ -132,7 +139,7 @@ EventBot.prototype.getTopic = function() {
     }
 };
 EventBot.prototype.stop = function() {
-    clearInterval(this.iid);
+    this.scheduler.stop();
 };
 
 exports.EventBot = EventBot;
