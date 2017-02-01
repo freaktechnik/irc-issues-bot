@@ -3,8 +3,16 @@ import Scheduler from '../scheduler';
 
 const SAFE_DELTA = 4;
 
+test.beforeEach((t) => {
+    t.context.s = new Scheduler();
+});
+
+test.afterEach.always((t) => {
+    t.false(t.context.s.hasTimeout());
+});
+
 test("constructor", (t) => {
-    const s = new Scheduler();
+    const s = t.context.s;
     t.is(s.scheduled.length, 0);
     t.is(s.intermediateCbks.length, 0);
 
@@ -18,7 +26,7 @@ test("constructor", (t) => {
 });
 
 test("set timeout", (t) => {
-    const s = new Scheduler();
+    const s = t.context.s;
     t.false(s.hasTimeout());
     t.is(s.currentTimeout, 0);
     t.is(s.TID, null);
@@ -35,7 +43,7 @@ test("set timeout", (t) => {
 });
 
 test.serial("schedule exact", async (t) => {
-    const s = new Scheduler();
+    const s = t.context.s;
 
     let scheduledOn;
     const p = new Promise((resolve) => {
@@ -44,11 +52,10 @@ test.serial("schedule exact", async (t) => {
     });
     await p;
     t.true(Math.abs((Date.now() - scheduledOn) - 500) < 100);
-    t.false(s.hasTimeout());
 });
 
 test.serial("schedule repeating", async (t) => {
-    const s = new Scheduler();
+    const s = t.context.s;
 
     const INTERVAL = 200;
     const DELTA = INTERVAL / SAFE_DELTA;
@@ -81,7 +88,7 @@ test.serial("schedule repeating", async (t) => {
 
 
 test.serial("schedule repeating with end time", async (t) => {
-    const s = new Scheduler();
+    const s = t.context.s;
 
     const INTERVAL = 200;
     const RUNS = 4;
@@ -111,11 +118,10 @@ test.serial("schedule repeating with end time", async (t) => {
             promiseHolder.r = resolve;
         });
     }
-    t.false(s.hasTimeout());
 });
 
 test.serial("schedule repeating smaller interval", async (t) => {
-    const s = new Scheduler();
+    const s = t.context.s;
 
     const INTERVAL = 500;
     const SMALLER_INTERVAL = Math.floor(INTERVAL / 3);
