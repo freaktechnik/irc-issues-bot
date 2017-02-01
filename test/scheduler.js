@@ -54,6 +54,10 @@ test.serial("schedule exact", async (t) => {
     t.true(Math.abs((Date.now() - scheduledOn) - 500) < 100);
 });
 
+test("Can't schedule in the past", (t) => {
+    t.throws(() => t.context.s.scheduleExact(Date.now() - 1000, t.fail));
+});
+
 test.serial("schedule repeating", async (t) => {
     const s = t.context.s;
 
