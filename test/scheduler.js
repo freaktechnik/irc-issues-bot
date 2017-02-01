@@ -65,6 +65,7 @@ test("schedule repeating", async (t) => {
             promiseHolder.r();
         });
         t.true(s.hasTimeout());
+        t.is(s.currentTimeout, INTERVAL);
     });
 
     for(let i = 1; i < 10; ++i) {
@@ -84,7 +85,7 @@ test("schedule repeating with end time", async (t) => {
 
     const INTERVAL = 200;
     const RUNS = 4;
-    const DELTA = INTERVAL / SAFE_DELTA;
+    const DELTA = Math.ceil(INTERVAL / SAFE_DELTA);
 
     let scheduledOn;
     const promiseHolder = {
@@ -94,14 +95,16 @@ test("schedule repeating with end time", async (t) => {
 
     promiseHolder.p = new Promise((resolve) => {
         scheduledOn = Date.now();
-        promiseHolder.r = resolve;
         s.scheduleRepeating(INTERVAL, () => {
             promiseHolder.r();
         }, scheduledOn + INTERVAL * RUNS);
+        promiseHolder.r = resolve;
         t.true(s.hasTimeout());
     });
 
-    for(let i = 1; i <= RUNS; ++i) {
+    const END = scheduledOn + INTERVAL * RUNS;
+
+    for(let i = 1; i <= RUNS && Date.now() < END; ++i) {
         await promiseHolder.p;
         t.true(Math.abs(Date.now() - scheduledOn - i * INTERVAL) < DELTA);
         promiseHolder.p = new Promise((resolve) => {
