@@ -58,6 +58,10 @@ test("Can't schedule in the past", (t) => {
     t.throws(() => t.context.s.scheduleExact(Date.now() - 1000, t.fail));
 });
 
+test("Can't schedule repeating ending in the past", (t) => {
+    t.throws(() => t.context.s.scheduleRepeating(500, t.fail, Date.now() - 1000));
+});
+
 test.serial("schedule repeating", async (t) => {
     const s = t.context.s;
 

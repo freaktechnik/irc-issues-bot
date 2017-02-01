@@ -58,6 +58,9 @@ Scheduler.prototype.moveTimeout = function(target) {
 };
 
 Scheduler.prototype.scheduleRepeating = function(interval, cbk, endTime = null) {
+    if(endTime !== null && endTime < Date.now()) {
+        throw "Repeating end time is in the past";
+    }
     this.scheduled.push({
         type: 'repeating',
         interval: interval,
