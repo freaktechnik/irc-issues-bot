@@ -34,7 +34,7 @@ test("set timeout", (t) => {
     t.is(s.TID, null);
 });
 
-test("schedule exact", async (t) => {
+test.serial("schedule exact", async (t) => {
     const s = new Scheduler();
 
     let scheduledOn;
@@ -47,7 +47,7 @@ test("schedule exact", async (t) => {
     t.false(s.hasTimeout());
 });
 
-test("schedule repeating", async (t) => {
+test.serial("schedule repeating", async (t) => {
     const s = new Scheduler();
 
     const INTERVAL = 200;
@@ -80,7 +80,7 @@ test("schedule repeating", async (t) => {
 });
 
 
-test("schedule repeating with end time", async (t) => {
+test.serial("schedule repeating with end time", async (t) => {
     const s = new Scheduler();
 
     const INTERVAL = 200;
@@ -114,7 +114,7 @@ test("schedule repeating with end time", async (t) => {
     t.false(s.hasTimeout());
 });
 
-test("schedule repeating smaller interval", async (t) => {
+test.serial("schedule repeating smaller interval", async (t) => {
     const s = new Scheduler();
 
     const INTERVAL = 500;
