@@ -17,6 +17,7 @@ Scheduler.prototype.check = function() {
     this.intermediateCbks.length = 0;
     this.scheduled = this.scheduled.filter((so) => {
         if(so.type == 'repeating') {
+            //TODO ensure timeouts that aren't a multple of the current interval also run correctly.
             if(Date.now() - so.lastRun >= so.interval) {
                 so.callback();
                 so.lastRun = Date.now();
@@ -48,7 +49,7 @@ Scheduler.prototype.moveTimeout = function(target) {
         clearInterval(this.TID);
     }
     if(target > 0) {
-        this.TID = setTimeout(this.check.bind(this), target);
+        this.TID = setInterval(this.check.bind(this), target);
     }
     else {
         this.TID = null;
