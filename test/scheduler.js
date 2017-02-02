@@ -2,8 +2,6 @@ import test from 'ava';
 import Scheduler from '../scheduler';
 import sinon from 'sinon';
 
-const SAFE_DELTA = 4;
-
 let clock;
 
 test.before(() => {
