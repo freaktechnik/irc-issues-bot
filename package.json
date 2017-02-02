@@ -42,6 +42,7 @@
     "codecov": "^1.0.1",
     "eslint": "^3.14.1",
     "eslint-plugin-freaktechnik": "^2.0.0",
-    "nyc": "^10.1.2"
+    "nyc": "^10.1.2",
+    "sinon": "^1.17.7"
   }
 }

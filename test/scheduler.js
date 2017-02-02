@@ -1,7 +1,14 @@
 import test from 'ava';
 import Scheduler from '../scheduler';
+import sinon from 'sinon';
 
 const SAFE_DELTA = 4;
+
+let clock;
+
+test.before(() => {
+    clock = sinon.useFakeTimers();
+});
 
 test.beforeEach((t) => {
     t.context.s = new Scheduler();
@@ -9,6 +16,10 @@ test.beforeEach((t) => {
 
 test.afterEach.always((t) => {
     t.false(t.context.s.hasTimeout());
+});
+
+test.after(() => {
+    clock.restore();
 });
 
 test("constructor", (t) => {
@@ -42,16 +53,17 @@ test("set timeout", (t) => {
     t.is(s.TID, null);
 });
 
-test.serial("schedule exact", async (t) => {
+test.serial("schedule exact", (t) => {
     const s = t.context.s;
 
-    let scheduledOn;
-    const p = new Promise((resolve) => {
-        scheduledOn = Date.now();
-        s.scheduleExact(scheduledOn + 500, resolve);
-    });
-    await p;
-    t.true(Math.abs((Date.now() - scheduledOn) - 500) < 100);
+    const INTERVAL = 500;
+
+    const scheduledOn = Date.now();
+    const cbk = sinon.spy();
+    s.scheduleExact(scheduledOn + 500, cbk);
+    clock.tick(INTERVAL);
+    t.is(Date.now() - scheduledOn, INTERVAL);
+    t.true(cbk.calledOnce);
 });
 
 test("Can't schedule in the past", (t) => {
@@ -66,30 +78,17 @@ test.serial("schedule repeating", async (t) => {
     const s = t.context.s;
 
     const INTERVAL = 200;
-    const DELTA = INTERVAL / SAFE_DELTA;
+    const RUNS = 10;
 
-    let scheduledOn;
-    const promiseHolder = {
-        r: null,
-        p: null
-    };
-    promiseHolder.p = new Promise((resolve) => {
-        scheduledOn = Date.now();
-        promiseHolder.r = resolve;
-        s.scheduleRepeating(INTERVAL, () => {
-            promiseHolder.r();
-        });
-        t.true(s.hasTimeout());
-        t.is(s.currentTimeout, INTERVAL);
-    });
+    const cbk = sinon.spy();
+    s.scheduleRepeating(INTERVAL, cbk);
+    t.true(s.hasTimeout());
+    t.is(s.currentTimeout, INTERVAL);
 
-    for(let i = 1; i < 10; ++i) {
-        await promiseHolder.p;
-        promiseHolder.p = new Promise((resolve) => {
-            promiseHolder.r = resolve;
-        });
-        t.true(Math.abs(Date.now() - scheduledOn - i * INTERVAL) < DELTA);
+    for(let i = 1; i < RUNS; ++i) {
+        clock.tick(INTERVAL);
         t.true(s.hasTimeout());
+        t.is(cbk.callCount, i);
     }
     s.stop();
 });
@@ -100,31 +99,14 @@ test.serial("schedule repeating with end time", async (t) => {
 
     const INTERVAL = 200;
     const RUNS = 4;
-    const DELTA = Math.ceil(INTERVAL / SAFE_DELTA);
 
-    let scheduledOn;
-    const promiseHolder = {
-        r: null,
-        p: null
-    };
+    const cbk = sinon.spy();
+    s.scheduleRepeating(INTERVAL, cbk, Date.now() + INTERVAL * RUNS);
 
-    promiseHolder.p = new Promise((resolve) => {
-        scheduledOn = Date.now();
-        s.scheduleRepeating(INTERVAL, () => {
-            promiseHolder.r();
-        }, scheduledOn + INTERVAL * RUNS);
-        promiseHolder.r = resolve;
+    for(let i = 1; i <= RUNS; ++i) {
         t.true(s.hasTimeout());
-    });
-
-    const END = scheduledOn + INTERVAL * RUNS;
-
-    for(let i = 1; i <= RUNS && Date.now() < END; ++i) {
-        await promiseHolder.p;
-        t.true(Math.abs(Date.now() - scheduledOn - i * INTERVAL) < DELTA);
-        promiseHolder.p = new Promise((resolve) => {
-            promiseHolder.r = resolve;
-        });
+        clock.tick(INTERVAL);
+        t.is(cbk.callCount, i);
     }
 });
 
@@ -133,35 +115,23 @@ test.serial("schedule repeating smaller interval", async (t) => {
 
     const INTERVAL = 500;
     const SMALLER_INTERVAL = Math.floor(INTERVAL / 3);
-    const DELTA = Math.ceil(SMALLER_INTERVAL / SAFE_DELTA);
+    const RUNS = 10;
+    const INTERVAL_CALLS = Math.floor(SMALLER_INTERVAL * RUNS / INTERVAL);
 
-    s.scheduleRepeating(INTERVAL, () => {
-        // nothing to do
-    });
+    const slowCbk = sinon.spy();
+    s.scheduleRepeating(INTERVAL, slowCbk);
     t.is(s.currentTimeout, INTERVAL);
 
-    let scheduledOn;
-    const promiseHolder = {
-        r: null,
-        p: null
-    };
-    promiseHolder.p = new Promise((resolve) => {
-        scheduledOn = Date.now();
-        promiseHolder.r = resolve;
-        s.scheduleRepeating(SMALLER_INTERVAL, () => {
-            promiseHolder.r();
-        });
-        t.is(s.currentTimeout, SMALLER_INTERVAL);
-    });
+    const cbk = sinon.spy();
+    s.scheduleRepeating(SMALLER_INTERVAL, cbk);
+    t.is(s.currentTimeout, SMALLER_INTERVAL);
 
-    for(let i = 1; i < 10; ++i) {
-        await promiseHolder.p;
-        promiseHolder.p = new Promise((resolve) => {
-            promiseHolder.r = resolve;
-        });
-        t.true(Math.abs(Date.now() - scheduledOn - i * SMALLER_INTERVAL) < DELTA);
+    for(let i = 1; i < RUNS; ++i) {
+        clock.tick(SMALLER_INTERVAL);
         t.is(s.currentTimeout, SMALLER_INTERVAL);
+        t.is(cbk.callCount, i);
     }
+    t.is(slowCbk.callCount, INTERVAL_CALLS);
     s.stop();
 });
 
