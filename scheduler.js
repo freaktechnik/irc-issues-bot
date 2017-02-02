@@ -1,5 +1,7 @@
 "use strict";
 
+const gcd = require("greatest-common-divisor");
+
 function Scheduler() {
     this.scheduled = [];
     this.intermediateCbks = [];
@@ -15,6 +17,7 @@ Scheduler.prototype.hasTimeout = function() {
 
 Scheduler.prototype.check = function() {
     this.intermediateCbks.length = 0;
+    const initialLength = this.scheduled.length;
     this.scheduled = this.scheduled.filter((so) => {
         if(so.type == 'repeating') {
             //TODO ensure timeouts that aren't a multple of the current interval also run correctly.
@@ -42,9 +45,28 @@ Scheduler.prototype.check = function() {
     if(this.scheduled.length == 0 && this.hasTimeout()) {
         this.stop();
     }
+    else if(this.scheduled.length < initialLength) {
+        this.updateTimeout();
+    }
+};
+
+Scheduler.prototype.getOptimalTimeout = function() {
+    const timeouts = [];
+    for(const t of this.scheduled) {
+        if(t.type == 'repeating') {
+            timeouts.push(t.interval);
+        }
+        else if(t.type == 'once') {
+            timeouts.push((t.endTime - Date.now()) / 2);
+        }
+    }
+    return gcd.apply(gcd, timeouts);
 };
 
 Scheduler.prototype.moveTimeout = function(target) {
+    if(target == this.currentTimeout) {
+        return;
+    }
     if(this.hasTimeout()) {
         clearInterval(this.TID);
     }
@@ -57,6 +79,10 @@ Scheduler.prototype.moveTimeout = function(target) {
     this.currentTimeout = target;
 };
 
+Scheduler.prototype.updateTimeout = function() {
+    this.moveTimeout(this.getOptimalTimeout());
+};
+
 Scheduler.prototype.scheduleRepeating = function(interval, cbk, endTime = null) {
     if(endTime !== null && endTime < Date.now()) {
         throw "Repeating end time is in the past";
@@ -65,12 +91,10 @@ Scheduler.prototype.scheduleRepeating = function(interval, cbk, endTime = null) 
         type: 'repeating',
         interval: interval,
         callback: cbk,
-        lastRun: 0,
+        lastRun: Date.now(),
         endTime: endTime
     });
-    if(interval < this.currentTimeout || !this.hasTimeout()) {
-        this.moveTimeout(interval);
-    }
+    this.updateTimeout();
 };
 
 Scheduler.prototype.scheduleExact = function(endTime, cbk) {
@@ -82,9 +106,7 @@ Scheduler.prototype.scheduleExact = function(endTime, cbk) {
         endTime: endTime,
         callback: cbk
     });
-    if(!this.hasTimeout() || this.currentTimeout > endTime - Date.now()) {
-        this.moveTimeout((endTime - Date.now()) / 2);
-    }
+    this.updateTimeout();
 };
 
 Scheduler.prototype.stop = function() {

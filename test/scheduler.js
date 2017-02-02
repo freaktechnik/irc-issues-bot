@@ -72,7 +72,7 @@ test("Can't schedule repeating ending in the past", (t) => {
     t.throws(() => t.context.s.scheduleRepeating(500, t.fail, Date.now() - 1000));
 });
 
-test.serial("schedule repeating", async (t) => {
+test.serial("schedule repeating", (t) => {
     const s = t.context.s;
 
     const INTERVAL = 200;
@@ -83,7 +83,7 @@ test.serial("schedule repeating", async (t) => {
     t.true(s.hasTimeout());
     t.is(s.currentTimeout, INTERVAL);
 
-    for(let i = 1; i < RUNS; ++i) {
+    for(let i = 1; i <= RUNS; ++i) {
         clock.tick(INTERVAL);
         t.true(s.hasTimeout());
         t.is(cbk.callCount, i);
@@ -92,7 +92,7 @@ test.serial("schedule repeating", async (t) => {
 });
 
 
-test.serial("schedule repeating with end time", async (t) => {
+test.serial("schedule repeating with end time", (t) => {
     const s = t.context.s;
 
     const INTERVAL = 200;
@@ -108,11 +108,11 @@ test.serial("schedule repeating with end time", async (t) => {
     }
 });
 
-test.serial("schedule repeating smaller interval", async (t) => {
+test.serial("schedule repeating smaller interval", (t) => {
     const s = t.context.s;
 
     const INTERVAL = 500;
-    const SMALLER_INTERVAL = Math.floor(INTERVAL / 3);
+    const SMALLER_INTERVAL = Math.floor(INTERVAL / 5);
     const RUNS = 10;
     const INTERVAL_CALLS = Math.floor(SMALLER_INTERVAL * RUNS / INTERVAL);
 
@@ -122,15 +122,40 @@ test.serial("schedule repeating smaller interval", async (t) => {
 
     const cbk = sinon.spy();
     s.scheduleRepeating(SMALLER_INTERVAL, cbk);
-    t.is(s.currentTimeout, SMALLER_INTERVAL);
+    t.true(s.currentTimeout <= SMALLER_INTERVAL);
 
-    for(let i = 1; i < RUNS; ++i) {
+    for(let i = 1; i <= RUNS; ++i) {
         clock.tick(SMALLER_INTERVAL);
-        t.is(s.currentTimeout, SMALLER_INTERVAL);
+        t.true(s.currentTimeout <= SMALLER_INTERVAL);
         t.is(cbk.callCount, i);
     }
     t.is(slowCbk.callCount, INTERVAL_CALLS);
     s.stop();
 });
 
-test.todo("schedule exact shorter than interval");
+test.serial("schedule exact shorter than interval", (t) => {
+    const s = t.context.s;
+
+    const INTERVAL = 500;
+    const EXACT = Math.floor(INTERVAL / 5);
+
+    const intervalCbk = sinon.spy();
+    s.scheduleRepeating(INTERVAL, intervalCbk);
+
+    t.true(s.hasTimeout());
+    t.is(s.currentTimeout, INTERVAL);
+
+    const exactCbk = sinon.spy();
+    s.scheduleExact(Date.now() + EXACT, exactCbk);
+
+    t.true(s.currentTimeout < INTERVAL);
+
+    clock.tick(EXACT);
+
+    t.true(exactCbk.calledOnce);
+    t.false(intervalCbk.called);
+    t.is(s.currentTimeout, INTERVAL);
+
+
+    s.stop();
+});
