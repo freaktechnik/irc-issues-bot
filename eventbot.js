@@ -34,9 +34,7 @@ function EventBot(client, channel, query) {
     // cache warmup
     this.getCurrentOrNextEventURL();
 
-    this.scheduler.scheduleRepeating(INTERVAL, () => {
-        this.doStuff();
-    });
+    this.scheduler.scheduleRepeating(INTERVAL, this.doStuff.bind(this));
     this.doStuff();
     this.description = "EventBot for " + query;
 }
@@ -82,7 +80,7 @@ EventBot.prototype.getCurrentOrNextEventURL = function() {
                 // Announce the even INTERVAL before it begins
                 this.scheduler.scheduleExact(this.event.start.getTime() - INTERVAL, this.announceEvent.bind(this));
                 // Ensure the event gets removed from the topic within timely manner.
-                this.scheduler.scheduleExact(this.event.end.getTime() + 10000, this.doStuff.bind(this));
+                this.scheduler.scheduleExact(this.event.end.getTime() + 60001, this.doStuff.bind(this));
                 resolve(this.event.url);
             }
             else {
