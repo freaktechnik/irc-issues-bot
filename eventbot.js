@@ -44,9 +44,7 @@ EventBot.prototype.query = "";
 EventBot.prototype.topic = "";
 EventBot.prototype.event = null;
 EventBot.prototype.doStuff = function() {
-    this.getTopic((topic) => {
-        this.updateTopic(topic);
-    });
+    this.getTopic().then(this.updateTopic.bind(this));
 };
 EventBot.prototype.canSetTopic = function() {
     return true;
