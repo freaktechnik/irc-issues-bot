@@ -44,7 +44,7 @@ EventBot.prototype.query = "";
 EventBot.prototype.topic = "";
 EventBot.prototype.nextScheduled = false;
 EventBot.prototype.doStuff = function() {
-    this.getTopic().then(this.updateTopic.bind(this));
+    return this.getTopic().then(this.updateTopic.bind(this));
 };
 EventBot.prototype.canSetTopic = function() {
     return true;
@@ -95,7 +95,7 @@ EventBot.prototype.getCurrentOrNextEventURL = function() {
     });
 };
 EventBot.prototype.getEventString = function() {
-    this.getCurrentOrNextEventURL().then((url) => {
+    return this.getCurrentOrNextEventURL().then((url) => {
         return "Next event: " + url;
     });
 };
