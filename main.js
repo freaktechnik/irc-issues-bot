@@ -33,9 +33,7 @@ const nick = args[1] || process.env.IRCBOT_USERNAME,
         port: process.env.IRCBOT_PORT || 6697,
         realName: 'IRC Issues Bot',
         secure: !process.env.IRCBOT_NOTSECURE,
-        sasl: !!password,
-        userName: nick,
-        password
+        userName: nick
     },
     client = new Client(args[0] || process.env.IRCBOT_SERVER,
         nick, ircOptions
@@ -181,7 +179,7 @@ function registerWithNickServ() {
         };
         client.addListener("+mode", tempModeListener);
 
-        /**client.say("NickServ", "IDENTIFY " + nick + " " + password);*/
+        client.say("NickServ", "IDENTIFY " + nick + " " + password);
         if(client.nick != nick) {
             client.say("NickServ", "RECOVER " + nick);
             client.send("NICK", nick);
