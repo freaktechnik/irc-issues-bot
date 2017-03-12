@@ -26,6 +26,7 @@ if(args.length < 2 && !process.env.IRCBOT_SERVER) {
 
 // IRC config
 const nick = args[1] || process.env.IRCBOT_USERNAME,
+    password = args[3] || process.env.IRCBOT_PASSWORD,
     ircOptions = {
         channels: storage.getItem("chans"),
         floodProtection: true,
@@ -33,14 +34,14 @@ const nick = args[1] || process.env.IRCBOT_USERNAME,
         realName: 'IRC Issues Bot',
         secure: !process.env.IRCBOT_NOTSECURE,
         sasl: true,
-        userName: nick
+        userName: nick,
+        password
     },
     client = new Client(args[0] || process.env.IRCBOT_SERVER,
         nick, ircOptions
     ),
     bots = { "git": {}, "quips": {}, "event": {} },
-    owner = args[2] || process.env.IRCBOT_OWNER,
-    password = args[3] || process.env.IRCBOT_PASSWORD;
+    owner = args[2] || process.env.IRCBOT_OWNER;
 
 setInterval(() => {
     client.send('PONG', 'empty');
@@ -180,7 +181,7 @@ function registerWithNickServ() {
         };
         client.addListener("+mode", tempModeListener);
 
-        client.say("NickServ", "IDENTIFY " + nick + " " + password);
+        /**client.say("NickServ", "IDENTIFY " + nick + " " + password);*/
         if(client.nick != nick) {
             client.say("NickServ", "RECOVER " + nick);
             client.send("NICK", nick);
