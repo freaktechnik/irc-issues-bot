@@ -43,9 +43,9 @@ const nick = args[1] || process.env.IRCBOT_USERNAME,
     bots = { "git": {}, "quips": {}, "event": {} },
     owner = args[2] || process.env.IRCBOT_OWNER;
 
-setInterval(() => {
+/*setInterval(() => {
     client.send('PONG', 'empty');
-}, 5 * 60 * 1000);
+}, 5 * 60 * 1000);*/
 
 function typeExists(type) {
     return type && botTypes.indexOf(type) > -1;
