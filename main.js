@@ -25,16 +25,16 @@ if(args.length < 2 && !process.env.IRCBOT_SERVER) {
 }
 
 // IRC config
-const ircOptions = {
-    "channels": storage.getItem("chans"),
-    "floodProtection": true,
-    "port": process.env.IRCBOT_PORT || 6697
-};
-if(!process.env.IRCBOT_NOTSECURE) {
-    ircOptions.secure = true;
-}
-
 const nick = args[1] || process.env.IRCBOT_USERNAME,
+    ircOptions = {
+        channels: storage.getItem("chans"),
+        floodProtection: true,
+        port: process.env.IRCBOT_PORT || 6697,
+        realName: 'IRC Issues Bot',
+        secure: !process.env.IRCBOT_NOTSECURE,
+        sasl: true,
+        userName: nick
+    },
     client = new Client(args[0] || process.env.IRCBOT_SERVER,
         nick, ircOptions
     ),

@@ -10,14 +10,17 @@ const irc = require("irc"),
 function getNextEvent(data) {
     const now = Date.now();
     let nextDate,
-        nextIndex;
+        nextIndex = null;
     for(const i in data) {
         if(data.hasOwnProperty(i) && ((!nextDate || data[i].start.getTime() < nextDate) && data[i].end.getTime() > now)) {
             nextIndex = i;
             nextDate = data[i].start.getTime();
         }
     }
-    return data[nextIndex];
+    if(nextIndex !== null) {
+        return data[nextIndex];
+    }
+    return null;
 }
 
 function EventBot(client, channel, query) {
@@ -31,9 +34,6 @@ function EventBot(client, channel, query) {
     this.query = query;
     this.scheduler = new Scheduler();
 
-    // cache warmup
-    this.getCurrentOrNextEventURL();
-
     this.scheduler.scheduleRepeating(INTERVAL, this.doStuff.bind(this));
     this.doStuff();
     this.description = "EventBot for " + query;
@@ -42,7 +42,7 @@ EventBot.prototype.listener = null;
 EventBot.prototype.client = null;
 EventBot.prototype.query = "";
 EventBot.prototype.topic = "";
-EventBot.prototype.event = null;
+EventBot.prototype.nextScheduled = false;
 EventBot.prototype.doStuff = function() {
     this.getTopic().then(this.updateTopic.bind(this));
 };
@@ -59,10 +59,10 @@ EventBot.prototype.canSetTopic = function() {
     return (channel.mode != "" && channel.mode.indexOf("t") == -1) || isOP;*/
 };
 
-EventBot.prototype.announceEvent = function() {
+EventBot.prototype.announceEvent = function(event) {
     try {
-        const startsIn = new Date(this.event.start.getTime() - Date.now());
-        this.client.say(this.channel, this.event.summary + " (" + this.event.url + ") starts in " + startsIn.getHours() + " hours and " + startsIn.getMinutes() + " minutes.");
+        const startsIn = new Date(event.start.getTime() - Date.now());
+        this.client.say(this.channel, event.summary + " (" + event.url + ") starts in " + startsIn.getHours() + " hours and " + startsIn.getMinutes() + " minutes.");
     }
     catch(e) {
         this.client.say(this.channel, "Failed to say something about the next event");
@@ -73,18 +73,24 @@ EventBot.prototype.announceEvent = function() {
 EventBot.prototype.getCurrentOrNextEventURL = function() {
     return new Promise((resolve) => {
         ical.fromURL('https://reps.mozilla.org/events/period/future/search/' + this.query + '/ical/', {}, (error, data) => {
-            if(!error && data && getNextEvent(data)) {
-                this.event = getNextEvent(data);
-                // Announce the even INTERVAL before it begins
-                this.scheduler.scheduleExact(this.event.start.getTime() - INTERVAL, this.announceEvent.bind(this));
-                // Ensure the event gets removed from the topic within timely manner.
-                this.scheduler.scheduleExact(this.event.end.getTime() + 60001, this.doStuff.bind(this));
-                resolve(this.event.url);
+            if(!error && data) {
+                const event = getNextEvent(data);
+                if(event !== null) {
+                    if(!this.nextScheduled) {
+                        // Announce the even INTERVAL before it begins
+                        this.scheduler.scheduleExact(event.start.getTime() - INTERVAL, this.announceEvent.bind(this, event));
+                        // Ensure the event gets removed from the topic within timely manner.
+                        this.scheduler.scheduleExact(event.end.getTime() + 60001, () => {
+                            this.nextScheduled = false;
+                            this.doStuff();
+                        });
+                        this.nextScheduled = true;
+                    }
+                    resolve(event.url);
+                    return;
+                }
             }
-            else {
-                this.event = null;
-                resolve("No event planned");
-            }
+            resolve("No event planned");
         });
     });
 };
@@ -93,28 +99,22 @@ EventBot.prototype.getEventString = function() {
         return "Next event: " + url;
     });
 };
-EventBot.prototype.topicCurrent = function(topic) {
-    this.getEventString().then((string) => {
-        return topic.split(SEPARATOR).pop() == string;
-    });
+EventBot.prototype.topicCurrent = function(topic, eventString) {
+    return topic.split(SEPARATOR).pop() == eventString;
 };
-EventBot.prototype.getNewTopic = function(topic) {
-    this.getEventString().then((string) => {
-        const arr = topic.split(SEPARATOR);
-        arr.splice(-1, 1, string);
-        return arr.join(SEPARATOR);
-    });
+EventBot.prototype.getNewTopic = function(topic, eventString) {
+    const arr = topic.split(SEPARATOR);
+    arr.splice(-1, 1, eventString);
+    return arr.join(SEPARATOR);
 };
 EventBot.prototype.updateTopic = function(topic) {
     if(!this.canSetTopic()) {
         return;
     }
 
-    this.topicCurrent(topic).then((isCurrent) => {
-        if(!isCurrent) {
-            this.getNewTopic(topic).then((newTopic) => {
-                this.client.send("TOPIC", this.channel, newTopic);
-            });
+    this.getEventString().then((eventString) => {
+        if(!this.topicCurrent(topic, eventString)) {
+            this.client.send("TOPIC", this.channel, this.getNewTopic(topic, eventString));
         }
     });
 };
