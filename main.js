@@ -33,7 +33,7 @@ const nick = args[1] || process.env.IRCBOT_USERNAME,
         port: process.env.IRCBOT_PORT || 6697,
         realName: 'IRC Issues Bot',
         secure: !process.env.IRCBOT_NOTSECURE,
-        sasl: true,
+        sasl: !!password,
         userName: nick,
         password
     },
