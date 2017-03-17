@@ -20,7 +20,7 @@ function _colorStatus(status) {
 function _additionalInfo(data) {
     let ret = "-- (",
         started = false;
-    if(data.assignees.length) {
+    if(data.assignees && data.assignees.length) {
         ret += "Assignees: " + data.assignees.map((a) => a.login).join(", ");
         started = true;
     }
