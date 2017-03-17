@@ -96,8 +96,8 @@ function IssuesBot(client, channel, repo) {
     };
     this.listener = (from, message) => {
         if(this.ignoredUsers.indexOf(from) == -1) {
-            const pattern = /([a-zA-Z0-9-]+\/[^#/]+)?#([1-9][0-9]*)/g,
-                issueLinkPattern = /https?:\/\/(www\.)?github\.com\/([^/]+)\/([^/]+)\/(issues|pull)\/([1-9][0-9]*)/g,
+            const pattern = /\b([a-zA-Z0-9-]+\/[^#/]+)?#([1-9][0-9]*)\b/g,
+                issueLinkPattern = /\bhttps?:\/\/(www\.)?github\.com\/([^/]+)\/([^/]+)\/(issues|pull)\/([1-9][0-9]*)\b/g,
                 foundIssues = [];
             if(pattern.test(message)) {
                 // reset the regexp pattern
