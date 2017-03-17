@@ -5,7 +5,8 @@ const irc = require("irc"),
     c = require("irc-colors"),
     storage = require("./storage"),
     github = new GithubAPI({
-        protocol: "https"
+        protocol: "https",
+        promise: Promise
     });
 
 function _colorStatus(status) {
@@ -75,23 +76,20 @@ function IssuesBot(client, channel, repo) {
     this.channel = channel;
 
     const getIssue = (owner, repo, number) => {
-        github.issues.get({
+        return github.issues.get({
             owner,
             repo,
             number
-        },
-        (e, data) => {
-            if(!e) {
-                const msg = (owner != this.owner || repo != this.repo ? c.grey(owner + "/" + repo + " ") : "") +
-                            (data.pull_request && data.pull_request.url != null ? "Pull " : "Issue ") +
-                            c.bold("#" + data.number) +
-                            ": " +
-                            data.title +
-                            _colorStatus(data.state) +
-                            _additionalInfo(data) +
-                            data.html_url;
-                this.client.say(this.channel, msg);
-            }
+        }).then(({ data }) => {
+            const msg = (owner != this.owner || repo != this.repo ? c.grey(owner + "/" + repo + " ") : "") +
+                        (data.pull_request && data.pull_request.url != null ? "Pull " : "Issue ") +
+                        c.bold("#" + data.number) +
+                        ": " +
+                        data.title +
+                        _colorStatus(data.state) +
+                        _additionalInfo(data) +
+                        data.html_url;
+            this.client.say(this.channel, msg);
         });
     };
     this.listener = (from, message) => {
