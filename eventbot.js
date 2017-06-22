@@ -10,14 +10,14 @@ const irc = require("irc"),
 function getNextEvent(data) {
     const now = Date.now();
     let nextDate,
-        nextIndex = null;
+        nextIndex;
     for(const i in data) {
-        if(data.hasOwnProperty(i) && ((!nextDate || data[i].start.getTime() < nextDate) && data[i].end.getTime() > now)) {
+        if(data.hasOwnProperty(i) && ((!nextDate || data[i].start.getTime() < nextDate) && data[i].end.getTime() > now && data[i].start.getTime() > now - INTERVAL)) {
             nextIndex = i;
             nextDate = data[i].start.getTime();
         }
     }
-    if(nextIndex !== null) {
+    if(nextIndex !== undefined) {
         return data[nextIndex];
     }
     return null;
