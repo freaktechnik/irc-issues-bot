@@ -30,6 +30,7 @@ const nick = args[1] || process.env.IRCBOT_USERNAME,
     ircOptions = {
         channels: storage.getItem("chans"),
         floodProtection: true,
+        floodProtectionDelay: 60000,
         port: process.env.IRCBOT_PORT || 6697,
         realName: 'IRC Issues Bot',
         secure: !process.env.IRCBOT_NOTSECURE,
