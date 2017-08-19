@@ -42,7 +42,7 @@
   "devDependencies": {
     "ava": "^0.22.0",
     "codecov": "^2.3.0",
-    "eslint": "^4.4.0",
+    "eslint": "^4.5.0",
     "eslint-plugin-freaktechnik": "^2.5.0",
     "nyc": "^11.1.0",
     "sinon": "^3.0.0"
