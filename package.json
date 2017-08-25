@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "deasync": "^0.1.4",
-    "github": "^9.2.0",
+    "github": "^10.0.0",
     "greatest-common-divisor": "^1.0.0",
     "ical": "^0.5.0",
     "irc": "^0.5.2",
