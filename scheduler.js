@@ -32,7 +32,7 @@ Scheduler.prototype.check = function() {
                 so.callback();
                 return false;
             }
-            else if(so.endTime + this.currentTimeout > Date.now()) {
+            else if(so.endTime < Date.now() + this.currentTimeout) {
                 // Precisely call the callback if it occurs before the next rundown of the queue.
                 this.intermediateCbks.push(setTimeout(so.callback, so.endTime - Date.now()));
                 return false;
@@ -57,10 +57,10 @@ Scheduler.prototype.getOptimalTimeout = function() {
             timeouts.push(t.interval);
         }
         else if(t.type == 'once') {
-            timeouts.push((t.endTime - Date.now()) / 2);
+            timeouts.push(Math.floor((t.endTime - Date.now()) / 2));
         }
     }
-    return gcd.apply(gcd, timeouts);
+    return Math.floor(gcd.apply(gcd, timeouts));
 };
 
 Scheduler.prototype.moveTimeout = function(target) {
@@ -110,6 +110,9 @@ Scheduler.prototype.scheduleExact = function(endTime, cbk) {
 };
 
 Scheduler.prototype.stop = function() {
+    for(const id of this.intermediateCbks) {
+        clearTimeout(id);
+    }
     this.moveTimeout(0);
 };
 

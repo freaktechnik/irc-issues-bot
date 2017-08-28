@@ -80,7 +80,7 @@ EventBot.prototype.getCurrentOrNextEventURL = function() {
                         // Announce the even INTERVAL before it begins
                         this.scheduler.scheduleExact(event.start.getTime() - INTERVAL, this.announceEvent.bind(this, event));
                         // Ensure the event gets removed from the topic within timely manner.
-                        this.scheduler.scheduleExact(event.end.getTime() + 60001, () => {
+                        this.scheduler.scheduleExact(event.end.getTime() + 60000, () => {
                             this.nextScheduled = false;
                             this.doStuff();
                         });
