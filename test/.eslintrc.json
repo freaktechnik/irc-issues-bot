@@ -1,3 +1,6 @@
 {
+    "parserOptions": {
+        "sourceType": "module"
+    },
     "extends": "plugin:freaktechnik/test"
 }

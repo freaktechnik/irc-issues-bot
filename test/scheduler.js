@@ -21,7 +21,7 @@ test.after(() => {
 });
 
 test("constructor", (t) => {
-    const s = t.context.s;
+    const { s } = t.context;
     t.is(s.scheduled.length, 0);
     t.is(s.intermediateCbks.length, 0);
 
@@ -35,7 +35,7 @@ test("constructor", (t) => {
 });
 
 test("set timeout", (t) => {
-    const s = t.context.s;
+    const { s } = t.context;
     t.false(s.hasTimeout());
     t.is(s.currentTimeout, 0);
     t.is(s.TID, null);
@@ -52,7 +52,7 @@ test("set timeout", (t) => {
 });
 
 test.serial("schedule exact", (t) => {
-    const s = t.context.s;
+    const { s } = t.context;
 
     const INTERVAL = 500;
 
@@ -73,7 +73,7 @@ test("Can't schedule repeating ending in the past", (t) => {
 });
 
 test.serial("schedule repeating", (t) => {
-    const s = t.context.s;
+    const { s } = t.context;
 
     const INTERVAL = 200;
     const RUNS = 10;
@@ -93,13 +93,13 @@ test.serial("schedule repeating", (t) => {
 
 
 test.serial("schedule repeating with end time", (t) => {
-    const s = t.context.s;
+    const { s } = t.context;
 
     const INTERVAL = 200;
     const RUNS = 4;
 
     const cbk = sinon.spy();
-    s.scheduleRepeating(INTERVAL, cbk, Date.now() + INTERVAL * RUNS);
+    s.scheduleRepeating(INTERVAL, cbk, Date.now() + (INTERVAL * RUNS));
 
     for(let i = 1; i <= RUNS; ++i) {
         t.true(s.hasTimeout());
@@ -109,7 +109,7 @@ test.serial("schedule repeating with end time", (t) => {
 });
 
 test.serial("schedule repeating smaller interval", (t) => {
-    const s = t.context.s;
+    const { s } = t.context;
 
     const INTERVAL = 500;
     const SMALLER_INTERVAL = Math.floor(INTERVAL / 5);
@@ -134,7 +134,7 @@ test.serial("schedule repeating smaller interval", (t) => {
 });
 
 test.serial("schedule exact shorter than interval", (t) => {
-    const s = t.context.s;
+    const { s } = t.context;
 
     const INTERVAL = 500;
     const EXACT = Math.floor(INTERVAL / 5);

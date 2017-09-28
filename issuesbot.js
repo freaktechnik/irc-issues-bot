@@ -11,22 +11,21 @@ const irc = require("irc"),
 
 function _colorStatus(status) {
     if(status == "open") {
-        return c.green(" [" + status + "] ");
+        return c.green(` [${status}] `);
     }
-    else {
-        return c.red(" [" + status + "] ");
-    }
+
+    return c.red(` [${status}] `);
 }
 
 function _additionalInfo(data) {
     let ret = "-- (",
         started = false;
     if(data.assignees && data.assignees.length) {
-        ret += "Assignees: " + data.assignees.map((a) => a.login).join(", ");
+        ret += `Assignees: ${data.assignees.map((a) => a.login).join(", ")}`;
         started = true;
     }
     else if(data.assignee != null) {
-        ret += "Assignee: " + data.assignee.login;
+        ret += `Assignee: ${data.assignee.login}`;
         started = true;
     }
     if(data.milestone != null) {
@@ -36,15 +35,14 @@ function _additionalInfo(data) {
         else {
             started = true;
         }
-        ret += "Milestone: " + data.milestone.title;
+        ret += `Milestone: ${data.milestone.title}`;
     }
 
     if(started) {
-        return c.grey(ret + ") ");
+        return c.grey(`${ret}) `);
     }
-    else {
-        return "";
-    }
+
+    return "";
 }
 
 function IssuesBot(client, channel, repo) {
@@ -68,71 +66,94 @@ function IssuesBot(client, channel, repo) {
     }
 
     if(repo) {
-        const details = repo.split("/");
-        this.owner = details[0];
-        this.repo = details[1];
+        const [
+            owner,
+            repoName
+        ] = repo.split("/");
+        this.owner = owner;
+        this.repo = repoName;
     }
 
     this.channel = channel;
 
-    const getIssue = (owner, repo, number) => {
-        return github.issues.get({
-            owner,
-            repo,
-            number
-        }).then(({ data }) => {
-            const msg = (owner != this.owner || repo != this.repo ? c.grey(owner + "/" + repo + " ") : "") +
+    const getIssue = (owner, repoName, number) => github.issues.get({
+        owner,
+        repoName,
+        number
+    }).then(({ data }) => {
+        const msg = `${(owner != this.owner || repoName != this.repo ? c.grey(`${owner}/${repoName} `) : "") +
                         (data.pull_request && data.pull_request.url != null ? "Pull " : "Issue ") +
-                        c.bold("#" + data.number) +
-                        ": " +
-                        data.title +
-                        _colorStatus(data.state) +
-                        _additionalInfo(data) +
-                        data.html_url;
-            this.client.say(this.channel, msg);
-        });
-    };
+                        c.bold(`#${data.number}`)
+        }: ${
+            data.title
+        }${_colorStatus(data.state)
+        }${_additionalInfo(data)
+        }${data.html_url}`;
+        this.client.say(this.channel, msg);
+    });
     this.listener = (from, message) => {
-        if(this.ignoredUsers.indexOf(from) == -1) {
+        if(!this.ignoredUsers.includes(from)) {
             const pattern = /(?:^|\s|(\b[a-zA-Z0-9-]+\/[^#/]+))#([1-9][0-9]*)\b/g,
-                issueLinkPattern = /\bhttps?:\/\/(www\.)?github\.com\/([^/]+)\/([^/]+)\/(issues|pull)\/([1-9][0-9]*)\b/g,
+                issueLinkPattern = /\bhttps?:\/\/(?:www\.)?github\.com\/([^/]+)\/([^/]+)\/(?:issues|pull)\/([1-9][0-9]*)\b/g,
                 foundIssues = [];
             if(pattern.test(message)) {
                 // reset the regexp pattern
                 pattern.lastIndex = 0;
-                let res,
-                    owner,
-                    repo;
-                while((res = pattern.exec(message)) !== null) {
-                    if(res[1] !== undefined) {
-                        owner = res[1].split("/")[0];
-                        repo = res[1].split("/")[1];
+                let owner,
+                    repoName;
+                let [
+                    match,
+                    rep,
+                    number
+                ] = pattern.exec(message);
+                while(match) {
+                    if(rep) {
+                        [
+                            owner,
+                            repoName
+                        ] = rep.split("/");
                     }
                     else {
                         owner = this.owner;
-                        repo = this.repo;
+                        repoName = this.repo;
                     }
-                    if(foundIssues.indexOf(owner + "/" + repo + "#" + res[2]) == -1) {
-                        foundIssues.push(owner + "/" + repo + "#" + res[2]);
-                        getIssue(owner, repo, res[2]);
+                    if(!foundIssues.includes(`${owner}/${repoName}#${number}`)) {
+                        foundIssues.push(`${owner}/${repoName}#${number}`);
+                        getIssue(owner, repoName, number);
                     }
+                    [
+                        match,
+                        rep,
+                        number
+                    ] = pattern.exec(message);
                 }
             }
             if(issueLinkPattern.test(message)) {
                 issueLinkPattern.lastIndex = 0;
-                let res;
-                while((res = issueLinkPattern.exec(message)) !== null) {
-                    if(foundIssues.indexOf(res[2] + "/" + res[3] + "#" + res[5]) == -1) {
-                        foundIssues.push(res[2] + "/" + res[3] + "#" + res[5]);
-                        getIssue(res[2], res[3], res[5]);
+                let [
+                    match,
+                    owner,
+                    repoName,
+                    number
+                ] = issueLinkPattern.exec(message);
+                while(match) {
+                    if(!foundIssues.includes(`${owner}/${repoName}#${number}`)) {
+                        foundIssues.push(`${owner}/${repoName}#${number}`);
+                        getIssue(owner, repoName, number);
                     }
+                    [
+                        match,
+                        owner,
+                        repoName,
+                        number
+                    ] = issueLinkPattern.exec(message);
                 }
             }
         }
     };
-    this.client.addListener("message" + channel, this.listener);
+    this.client.addListener(`message${channel}`, this.listener);
 
-    this.description = "IssuesBot for " + repo;
+    this.description = `IssuesBot for ${repo}`;
 }
 
 IssuesBot.prototype.owner = "";
@@ -142,7 +163,7 @@ IssuesBot.prototype.ignoredUsers = [];
 IssuesBot.prototype.channel = "";
 
 IssuesBot.prototype.stop = function() {
-    this.client.removeListener("message" + this.channel, this.listener);
+    this.client.removeListener(`message${this.channel}`, this.listener);
 };
 
 IssuesBot.prototype.ignoreUser = function(user) {

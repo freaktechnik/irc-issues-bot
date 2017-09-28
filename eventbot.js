@@ -3,7 +3,10 @@
 const irc = require("irc"),
     ical = require("ical"),
     Scheduler = require("./scheduler"),
+    util = require("util"),
+    icalFromURL = util.promisify(ical.fromURL),
     SEPARATOR = " | ",
+    MINUTE = 60000,
     INTERVAL = 3600000; // 1 hour, I think.
 
 //TODO tz correction?
@@ -35,8 +38,8 @@ function EventBot(client, channel, query) {
     this.scheduler = new Scheduler();
 
     this.scheduler.scheduleRepeating(INTERVAL, this.doStuff.bind(this));
-    this.doStuff();
-    this.description = "EventBot for " + query;
+    this.doStuff().catch(console.error);
+    this.description = `EventBot for ${query}`;
 }
 EventBot.prototype.listener = null;
 EventBot.prototype.client = null;
@@ -62,7 +65,7 @@ EventBot.prototype.canSetTopic = function() {
 EventBot.prototype.announceEvent = function(event) {
     try {
         const startsIn = new Date(event.start.getTime() - Date.now());
-        this.client.say(this.channel, event.summary + " (" + event.url + ") starts in " + startsIn.getHours() + " hours and " + startsIn.getMinutes() + " minutes.");
+        this.client.say(this.channel, `${event.summary} (${event.url}) starts in ${startsIn.getHours()} hours and ${startsIn.getMinutes()} minutes.`);
     }
     catch(e) {
         this.client.say(this.channel, "Failed to say something about the next event");
@@ -71,48 +74,44 @@ EventBot.prototype.announceEvent = function(event) {
 };
 
 EventBot.prototype.getCurrentOrNextEventURL = function() {
-    return new Promise((resolve) => {
-        ical.fromURL('https://reps.mozilla.org/events/period/future/search/' + this.query + '/ical/', {}, (error, data) => {
-            if(!error && data) {
-                const event = getNextEvent(data);
-                if(event !== null) {
-                    if(!this.nextScheduled) {
-                        // Announce the even INTERVAL before it begins
-                        this.scheduler.scheduleExact(event.start.getTime() - INTERVAL, this.announceEvent.bind(this, event));
-                        // Ensure the event gets removed from the topic within timely manner.
-                        this.scheduler.scheduleExact(event.end.getTime() + 60000, () => {
-                            this.nextScheduled = false;
-                            this.doStuff();
-                        });
-                        this.nextScheduled = true;
-                    }
-                    resolve(event.url);
-                    return;
+    return icalFromURL(`https://reps.mozilla.org/events/period/future/search/${this.query}/ical/`, {}).then((data) => {
+        if(data) {
+            const event = getNextEvent(data);
+            if(event !== null) {
+                if(!this.nextScheduled) {
+                    // Announce the even INTERVAL before it begins
+                    this.scheduler.scheduleExact(event.start.getTime() - INTERVAL, this.announceEvent.bind(this, event));
+                    // Ensure the event gets removed from the topic within timely manner.
+                    this.scheduler.scheduleExact(event.end.getTime() + MINUTE, () => {
+                        this.nextScheduled = false;
+                        this.doStuff().catch(console.error);
+                    });
+                    this.nextScheduled = true;
                 }
+                return event.url;
             }
-            resolve("No event planned");
-        });
+        }
+        return "No event planned";
     });
 };
 EventBot.prototype.getEventString = function() {
-    return this.getCurrentOrNextEventURL().then((url) => {
-        return "Next event: " + url;
-    });
+    return this.getCurrentOrNextEventURL().then((url) => `Next event: ${url}`);
 };
 EventBot.prototype.topicCurrent = function(topic, eventString) {
     return topic.split(SEPARATOR).pop() == eventString;
 };
 EventBot.prototype.getNewTopic = function(topic, eventString) {
     const arr = topic.split(SEPARATOR);
-    arr.splice(-1, 1, eventString);
+    arr.pop();
+    arr.push(eventString);
     return arr.join(SEPARATOR);
 };
 EventBot.prototype.updateTopic = function(topic) {
     if(!this.canSetTopic()) {
-        return;
+        return Promise.resolve();
     }
 
-    this.getEventString().then((eventString) => {
+    return this.getEventString().then((eventString) => {
         if(!this.topicCurrent(topic, eventString)) {
             this.client.send("TOPIC", this.channel, this.getNewTopic(topic, eventString));
         }
@@ -122,17 +121,16 @@ EventBot.prototype.getTopic = function() {
     if(this.channel in this.client.chans && "topic" in this.client.chans[this.channel]) {
         return Promise.resolve(this.client.chans[this.channel].topic);
     }
-    else {
-        return new Promise((resolve) => {
-            const tempListener = (channel, topic) => {
-                if(channel == this.channel) {
-                    this.client.removeListener("topic", tempListener);
-                    resolve(topic);
-                }
-            };
-            this.client.addListener("topic", tempListener);
-        });
-    }
+
+    return new Promise((resolve) => {
+        const tempListener = (channel, topic) => {
+            if(channel == this.channel) {
+                this.client.removeListener("topic", tempListener);
+                resolve(topic);
+            }
+        };
+        this.client.addListener("topic", tempListener);
+    });
 };
 EventBot.prototype.stop = function() {
     this.scheduler.stop();
