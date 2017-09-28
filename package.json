@@ -4,7 +4,7 @@
   "description": "A simple IRC bot that replies with a link to the github issue when an issue number is mentioned",
   "main": "issuesbot",
   "scripts": {
-    "lint": "eslint main.js issuesbot.js eventbot.js quipsbot.js storage.js test/",
+    "lint": "eslint main.js issuesbot.js eventbot.js quipsbot.js storage.js test/ --ext js,json",
     "test": "npm run lint && nyc ava",
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "start": "node main.js"
