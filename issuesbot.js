@@ -105,7 +105,7 @@ function IssuesBot(client, channel, repo) {
                     match,
                     rep,
                     number
-                ] = pattern.exec(message);
+                ] = pattern.exec(message) || [];
                 while(match) {
                     if(rep) {
                         [
@@ -125,7 +125,7 @@ function IssuesBot(client, channel, repo) {
                         match,
                         rep,
                         number
-                    ] = pattern.exec(message);
+                    ] = pattern.exec(message) || [];
                 }
             }
             if(issueLinkPattern.test(message)) {
@@ -135,7 +135,7 @@ function IssuesBot(client, channel, repo) {
                     owner,
                     repoName,
                     number
-                ] = issueLinkPattern.exec(message);
+                ] = issueLinkPattern.exec(message) || [];
                 while(match) {
                     if(!foundIssues.includes(`${owner}/${repoName}#${number}`)) {
                         foundIssues.push(`${owner}/${repoName}#${number}`);
@@ -146,7 +146,7 @@ function IssuesBot(client, channel, repo) {
                         owner,
                         repoName,
                         number
-                    ] = issueLinkPattern.exec(message);
+                    ] = issueLinkPattern.exec(message) || [];
                 }
             }
         }
