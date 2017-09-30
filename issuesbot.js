@@ -81,14 +81,9 @@ function IssuesBot(client, channel, repo) {
         repoName,
         number
     }).then(({ data }) => {
-        const msg = `${(owner != this.owner || repoName != this.repo ? c.grey(`${owner}/${repoName} `) : "") +
-                        (data.pull_request && data.pull_request.url != null ? "Pull " : "Issue ") +
-                        c.bold(`#${data.number}`)
-        }: ${
-            data.title
-        }${_colorStatus(data.state)
-        }${_additionalInfo(data)
-        }${data.html_url}`;
+        const repoIdentifier = owner != this.owner || repoName != this.repo ? c.grey(`${owner}/${repoName} `) : "",
+            issueType = data.pull_request && data.pull_request.url != null ? "Pull" : "Issue",
+            msg = `${repoIdentifier}${issueType} ${c.bold(`#${data.number}`)}: ${data.title}${_colorStatus(data.state)}${_additionalInfo(data)}${data.html_url}`;
         this.client.say(this.channel, msg);
     });
     this.listener = (from, message) => {
@@ -119,7 +114,7 @@ function IssuesBot(client, channel, repo) {
                     }
                     if(!foundIssues.includes(`${owner}/${repoName}#${number}`)) {
                         foundIssues.push(`${owner}/${repoName}#${number}`);
-                        getIssue(owner, repoName, number);
+                        getIssue(owner, repoName, number).catch(console.error);
                     }
                     [
                         match,
@@ -139,7 +134,7 @@ function IssuesBot(client, channel, repo) {
                 while(match) {
                     if(!foundIssues.includes(`${owner}/${repoName}#${number}`)) {
                         foundIssues.push(`${owner}/${repoName}#${number}`);
-                        getIssue(owner, repoName, number);
+                        getIssue(owner, repoName, number).catch(console.error);
                     }
                     [
                         match,
