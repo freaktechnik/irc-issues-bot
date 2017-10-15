@@ -1,3 +1,3 @@
 {
-    "extends": "plugin:freaktechnik/node"
+    "extends": "@freaktechnik/eslint-config-node"
 }

@@ -1,6 +1,3 @@
 {
-    "parserOptions": {
-        "sourceType": "module"
-    },
-    "extends": "plugin:freaktechnik/test"
+    "extends": "@freaktechnik/eslint-config-test"
 }
