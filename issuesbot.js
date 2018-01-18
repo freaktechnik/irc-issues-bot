@@ -1,7 +1,7 @@
 "use strict";
 
 const irc = require("irc"),
-    GithubAPI = require("github"),
+    GithubAPI = require("@octokit/rest"),
     c = require("irc-colors"),
     storage = require("./storage"),
     github = new GithubAPI({
