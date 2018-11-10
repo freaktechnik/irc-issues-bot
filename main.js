@@ -260,7 +260,7 @@ Promise.all([
                     client.say(from, botTypes.join(", "));
                 }
                 else if(channel && channel.startsWith("#") &&
-                   ( from == owner || isUserOp(channel, from) )) {
+                    ( from == owner || isUserOp(channel, from) )) {
                     if(command == "!leave") {
                         leaveChannel(channel);
                     }
