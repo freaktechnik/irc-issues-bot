@@ -1,16 +1,33 @@
 "use strict";
 
 if(process.env.REDIS_URL) {
-    const client = require('redis').createClient(process.env.REDIS_URL),
-        deasync = require('deasync'),
-        getItem = deasync(client.get.bind(client));
+    const client = require('redis').createClient(process.env.REDIS_URL);
 
     module.exports = {
         getItem(key) {
-            return JSON.parse(getItem(key));
+            return new Promise((resolve, reject) => client.getItem(key, (err, res) => {
+                if(err) {
+                    reject(err);
+                }
+                else {
+                    try {
+                        resolve(JSON.parse(res));
+                    }
+                    catch(e) {
+                        reject(e);
+                    }
+                }
+            }));
         },
         setItem(key, value) {
-            client.set(key, JSON.stringify(value));
+            return new Promise((resolve, reject) => client.set(key, JSON.stringify(value), (err) => {
+                if(err) {
+                    reject(err);
+                }
+                else {
+                    resolve();
+                }
+            }));
         }
     };
 }
@@ -20,10 +37,16 @@ else {
 
     module.exports = {
         getItem(key) {
-            return JSON.parse(localStorage.getItem(key));
+            try {
+                return Promise.resolve(JSON.parse(localStorage.getItem(key)));
+            }
+            catch(e) {
+                return Promise.reject(e);
+            }
         },
         setItem(key, value) {
             localStorage.setItem(key, JSON.stringify(value));
+            return Promise.resolve();
         }
     };
 }

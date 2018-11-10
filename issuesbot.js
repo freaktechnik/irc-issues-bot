@@ -46,17 +46,22 @@ function _additionalInfo(data) {
 }
 
 function IssuesBot(client, channel, repo) {
-    if(!storage.getItem("ignore")) {
-        storage.setItem("ignore", {});
-    }
+    this.ready = storage.getItem("ignore")
+        .then((val) => {
+            if(!val) {
+                return storage.setItem("ignore", {});
+            }
+            return val;
+        })
+        .then((ignores = {}) => {
+            if(!ignores[channel]) {
+                ignores[channel] = [];
+                return storage.setItem("ignore", ignores);
+            }
+            this.ignoredUsers = ignores[channel];
+        })
+        .catch(console.error);
 
-    const ignores = storage.getItem("ignore");
-    if(!ignores[channel]) {
-        ignores[channel] = [];
-        storage.setItem("ignore", ignores);
-    }
-
-    this.ignoredUsers = ignores[channel];
 
     if(!client || !(client instanceof irc.Client)) {
         throw new Error("Must pass an irc client argument to the constructor.");
@@ -88,19 +93,19 @@ function IssuesBot(client, channel, repo) {
     });
     this.listener = (from, message) => {
         if(!this.ignoredUsers.includes(from)) {
-            const pattern = /(?:^|\s|(\b[a-zA-Z0-9-]+\/[^#/]+))#([1-9][0-9]*)\b/g,
-                issueLinkPattern = /\bhttps?:\/\/(?:www\.)?github\.com\/([^/]+)\/([^/]+)\/(?:issues|pull)\/([1-9][0-9]*)\b/g,
+            const pattern = /(?:^|\s|(\b[a-zA-Z0-9-]+\/[^#/]+))#([1-9]\d*)\b/g,
+                issueLinkPattern = /\bhttps?:\/\/(?:www\.)?github\.com\/([^/]+)\/([^/]+)\/(?:issues|pull)\/([1-9]\d*)\b/g,
                 foundIssues = [];
             if(pattern.test(message)) {
                 // reset the regexp pattern
                 pattern.lastIndex = 0;
                 let owner,
-                    repoName;
-                let [
-                    match,
-                    rep,
-                    number
-                ] = pattern.exec(message) || [];
+                    repoName,
+                    [
+                        match,
+                        rep,
+                        number
+                    ] = pattern.exec(message) || [];
                 while(match) {
                     if(rep) {
                         [
@@ -163,9 +168,13 @@ IssuesBot.prototype.stop = function() {
 
 IssuesBot.prototype.ignoreUser = function(user) {
     this.ignoredUsers.push(user);
-    const ignores = storage.getItem("ignore");
-    ignores[this.channel].push(user);
-    storage.setItem("ignore", ignores);
+    this.ready
+        .then(() => storage.getItem("ignore"))
+        .then((ignores) => {
+            ignores[this.channel].push(user);
+            return storage.setItem("ignore", ignores);
+        })
+        .catch(console.error);
 };
 
 exports.IssuesBot = IssuesBot;

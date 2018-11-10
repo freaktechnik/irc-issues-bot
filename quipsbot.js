@@ -8,25 +8,32 @@ function _storeQuip(channel, message) {
     if(message.includes("/")) {
         return;
     }
-    const quips = storage.getItem(`quips${channel}`) || [];
-    quips.push(message);
-    storage.setItem(`quips${channel}`, quips);
+    return storage.getItem(`quips${channel}`)
+        .then((quips = []) => {
+            quips.push(message);
+            return storage.setItem(`quips${channel}`, quips);
+        });
 }
 
 function _getRandomQuip(channel) {
-    const quips = storage.getItem(`quips${channel}`);
-    if(quips.length) {
-        return randomItem(quips);
-    }
+    return storage.getItem(`quips${channel}`)
+        .then((quips) => {
+            if(quips.length) {
+                return randomItem(quips);
+            }
 
-    return " Hm?";
+            return " Hm?";
+        });
 }
 
 function QuipsBot(client, channel) {
-    const item = storage.getItem(`quips${channel}`);
-    if(!item || !item.length) {
-        storage.setItem(`quips${channel}`, []);
-    }
+    this.ready = storage.getItem(`quips${channel}`)
+        .then((item) => {
+            if(!item || !item.length) {
+                return storage.setItem(`quips${channel}`, []);
+            }
+        })
+        .catch(console.error);
 
     if(!client || !(client instanceof irc.Client)) {
         throw new Error("Must pass an irc client argument to the constructor.");
@@ -40,10 +47,17 @@ function QuipsBot(client, channel) {
     this.listener = function(from, message) {
         const pattern = new RegExp(`^${client.nick}:.{2,}`);
         if(pattern.test(message)) {
-            _storeQuip(channel, message.slice(++client.nick.length).trim());
+            this.ready
+                .then(_storeQuip(channel, message.slice(++client.nick.length).trim()))
+                .catch(console.error);
         }
         else if(message.includes(client.nick)) {
-            client.say(channel, `${from}: ${_getRandomQuip(channel)}`);
+            this.ready
+                .then(_getRandomQuip(channel))
+                .then((quip) => {
+                    client.say(channel, `${from}: ${quip}`);
+                })
+                .catch(console.error);
         }
     };
     this.client.addListener(`message${channel}`, this.listener);
