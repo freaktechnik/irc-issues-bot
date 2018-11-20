@@ -5,7 +5,7 @@ if(process.env.REDIS_URL) {
 
     module.exports = {
         getItem(key) {
-            return new Promise((resolve, reject) => client.getItem(key, (err, res) => {
+            return new Promise((resolve, reject) => client.get(key, (err, res) => {
                 if(err) {
                     reject(err);
                 }
