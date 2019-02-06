@@ -1,12 +1,23 @@
 "use strict";
 
 const irc = require("irc"),
-    GithubAPI = require("@octokit/rest"),
+    GithubAPI = require("@octokit/rest")
+        .plugin(require("@octokit/plugin-throttle"))
+        .plugin(require("@octokit/plugin-retry")),
     c = require("irc-colors"),
     storage = require("./storage"),
     github = new GithubAPI({
-        protocol: "https",
-        promise: Promise
+        throttle: {
+            onRateLimit(retryAfter, options) {
+                console.warn(`Retrying ${options.method} ${options.url}`);
+                if(options.request.retryCount < 4) {
+                    return true;
+                }
+            },
+            onAbuseLimit(retryAfter, options) {
+                console.warn(`Abuse detected for request ${options.method} ${options.url}`);
+            }
+        }
     });
 
 function _colorStatus(status) {
