@@ -2,15 +2,16 @@
 
 const irc = require("irc"),
     GithubAPI = require("@octokit/rest")
-        .plugin(require("@octokit/plugin-throttle"))
+        .plugin(require("@octokit/plugin-throttling"))
         .plugin(require("@octokit/plugin-retry")),
     c = require("irc-colors"),
     storage = require("./storage"),
+    MAX_RETRIES = 4,
     github = new GithubAPI({
         throttle: {
             onRateLimit(retryAfter, options) {
                 console.warn(`Retrying ${options.method} ${options.url}`);
-                if(options.request.retryCount < 4) {
+                if(options.request.retryCount < MAX_RETRIES) {
                     return true;
                 }
             },
