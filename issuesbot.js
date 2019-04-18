@@ -96,7 +96,7 @@ function IssuesBot(client, channel, repo) {
     const getIssue = (owner, repoName, number) => github.issues.get({
         owner,
         repo: repoName,
-        number
+        'issue_number': number
     }).then(({ data }) => {
         const repoIdentifier = owner != this.owner || repoName != this.repo ? c.grey(`${owner}/${repoName} `) : "",
             issueType = data.pull_request && data.pull_request.url != null ? "Pull" : "Issue",

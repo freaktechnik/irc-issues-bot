@@ -19,9 +19,9 @@
     "url": "git://github.com/freaktechnik/irc-issues-bot.git"
   },
   "dependencies": {
-    "@octokit/plugin-retry": "^2.1.2",
+    "@octokit/plugin-retry": "^2.2.0",
     "@octokit/plugin-throttling": "^2.4.0",
-    "@octokit/rest": "^16.23.1",
+    "@octokit/rest": "^16.24.3",
     "greatest-common-divisor": "^1.0.0",
     "ical": "^0.6.0",
     "irc": "^0.5.2",
@@ -43,13 +43,13 @@
   },
   "private": true,
   "devDependencies": {
-    "@freaktechnik/eslint-config-node": "^6.5.4",
-    "@freaktechnik/eslint-config-test": "^6.5.4",
-    "ava": "^1.2.1",
-    "codecov": "^3.1.0",
+    "@freaktechnik/eslint-config-node": "^6.6.2",
+    "@freaktechnik/eslint-config-test": "^6.6.2",
+    "ava": "^1.4.1",
+    "codecov": "^3.3.0",
     "eclint": "^2.8.1",
-    "eslint": "^5.13.0",
+    "eslint": "^5.16.0",
     "nyc": "^14.0.0",
-    "sinon": "^7.2.4"
+    "sinon": "^7.3.2"
   }
 }
