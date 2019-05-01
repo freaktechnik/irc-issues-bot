@@ -296,10 +296,11 @@ Promise.all([
                 }
                 else if(from == owner) {
                     if(command == "!list") {
-                        const channels = storage.getItem("chans");
-                        channels.forEach((chan) => {
-                            client.say(from, listBotsInChannel(chan));
-                        });
+                        storage.getItem("chans").then((channels) => {
+                            channels.forEach((chan) => {
+                                client.say(from, listBotsInChannel(chan));
+                            });
+                        }).catch(console.error);
                     }
                     else {
                         client.say(from, "Command not found.");
