@@ -21,7 +21,7 @@
   "dependencies": {
     "@octokit/plugin-retry": "^2.2.0",
     "@octokit/plugin-throttling": "^2.4.0",
-    "@octokit/rest": "^16.24.3",
+    "@octokit/rest": "^16.25.1",
     "greatest-common-divisor": "^1.0.0",
     "ical": "^0.6.0",
     "irc": "^0.5.2",
