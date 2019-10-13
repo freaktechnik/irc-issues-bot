@@ -8,16 +8,16 @@ test.before(() => {
     clock = sinon.useFakeTimers();
 });
 
+test.after(() => {
+    clock.restore();
+});
+
 test.beforeEach((t) => {
     t.context.s = new Scheduler();
 });
 
 test.afterEach.always((t) => {
     t.false(t.context.s.hasTimeout());
-});
-
-test.after(() => {
-    clock.restore();
 });
 
 test("constructor", (t) => {

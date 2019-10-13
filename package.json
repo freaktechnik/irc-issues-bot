@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@octokit/plugin-retry": "^2.2.0",
-    "@octokit/plugin-throttling": "^2.4.0",
-    "@octokit/rest": "^16.27.3",
+    "@octokit/plugin-throttling": "^2.7.0",
+    "@octokit/rest": "^16.33.1",
     "greatest-common-divisor": "^1.0.0",
     "ical": "^0.6.0",
     "irc": "^0.5.2",
@@ -43,13 +43,13 @@
   },
   "private": true,
   "devDependencies": {
-    "@freaktechnik/eslint-config-node": "^6.6.2",
-    "@freaktechnik/eslint-config-test": "^6.6.2",
-    "ava": "^2.0.0",
-    "codecov": "^3.3.0",
+    "@freaktechnik/eslint-config-node": "^7.0.0",
+    "@freaktechnik/eslint-config-test": "^7.0.0",
+    "ava": "^2.4.0",
+    "codecov": "^3.6.1",
     "eclint": "^2.8.1",
-    "eslint": "^5.16.0",
-    "nyc": "^14.0.0",
-    "sinon": "^7.3.2"
+    "eslint": "^6.5.1",
+    "nyc": "^14.1.1",
+    "sinon": "^7.5.0"
   }
 }
