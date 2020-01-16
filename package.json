@@ -19,7 +19,7 @@
     "url": "git://github.com/freaktechnik/irc-issues-bot.git"
   },
   "dependencies": {
-    "@octokit/plugin-retry": "^2.2.0",
+    "@octokit/plugin-retry": "^3.0.1",
     "@octokit/plugin-throttling": "^2.7.0",
     "@octokit/rest": "^16.33.1",
     "greatest-common-divisor": "^1.0.0",
